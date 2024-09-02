@@ -351,7 +351,7 @@ def get_ipaddr(force=False):
 
     get_ipaddr.city = get_country_city(ipv4 if ipv4 else ipv6)
     get_ipaddr.text = ipv4 + (" - " if ipv4 else "") + get_ipaddr.city \
-            + "\n" + (ipv6 if ipv6 else "-= ipv6 address unavailable =-")
+            + "\n" + (ipv6 if ipv6 else "-= ipv6 address missing =-")
 
     if get_ipaddr.dbg:
         print("get_ipaddr(try, ipstr):", get_ipaddr.tries,
