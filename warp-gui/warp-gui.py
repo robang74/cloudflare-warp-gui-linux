@@ -349,14 +349,8 @@ def get_ipaddr(force=False):
     if not ipv4 and not ipv6:
         return inrun_reset(ipaddr_searching + ipaddr_errstring)
 
-    city = get_country_city(ipv4 if ipv4 else ipv6)
-    get_ipaddr.city = city
-
-    if not ipv4 or not ipv6 or not city:
-        if get_ipaddr.tries > 1:
-            root.after(3000, force_get_ipaddr)
-
-    get_ipaddr.text = ipv4 + (" - " if ipv4 else "") + city \
+    get_ipaddr.city = get_country_city(ipv4 if ipv4 else ipv6)
+    get_ipaddr.text = ipv4 + (" - " if ipv4 else "") + get_ipaddr.city \
             + "\n" + (ipv6 if ipv6 else "-= ipv6 address unavailable =-")
 
     if get_ipaddr.dbg:
