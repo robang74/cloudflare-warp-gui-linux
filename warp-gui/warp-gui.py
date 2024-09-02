@@ -297,6 +297,30 @@ def cf_info():
     return getoutput("warp-cli --version")
 
 
+def ipaddr_info_update(enable=0):
+    if get_ipaddr.dbg:
+        print("ipaddr_info_update: ", enable)
+
+    if enable:
+        try:
+            ipaddr_info_update.tr.join()
+        except:
+            pass
+        root.update_idletasks()
+        menubar.entryconfigure(3, state = NORMAL)
+        menubar.update_idletasks()
+        inrun_reset()
+    else:
+        inrun_wait_or_set()
+        menubar.entryconfigure(3, state = DISABLED)
+        menubar.update_idletasks()
+        ipaddr_info_update.tr = Thread(target=force_get_ipaddr)
+        ipaddr_info_update.tr.start()
+
+ipaddr_info_update.tr = None
+ipaddr_info_update.inrun = 0
+
+
 def force_get_ipaddr():
     ipaddr_text_set()
     get_ipaddr(True)
@@ -356,6 +380,8 @@ def get_ipaddr(force=False):
     if get_ipaddr.dbg:
         print("get_ipaddr(try, ipstr):", get_ipaddr.tries,
             get_ipaddr.text.replace("\n", " "))
+
+    ipaddr_info_update(1)
 
     return inrun_reset(get_ipaddr.text)
 
@@ -645,8 +671,8 @@ root.config(bg = bgcolor)
 menubar = Menu(root, bg = bgcolor, activeborderwidth = 4, relief=GROOVE, fg = "Black")
 helpmenu = Menu(menubar, tearoff=1, font = "Arial 12", title="WARP GUI > MENU")
 menubar.add_cascade(label="\u25BD MENU", compound="left", menu=helpmenu)
-menubar.add_cascade(label="\u205D",    compound="left")
-menubar.add_command(label="\u21F1 IP \u21F2", compound="left", command=force_get_ipaddr)
+menubar.add_cascade(label="\u205D", compound="left")
+menubar.add_command(label="\u21F1 IP \u21F2",             command=ipaddr_info_update, compound="left", state=DISABLED)
 
 helpmenu.add_command(label=" \u204E WARP Session Renew ", command=session_renew)
 helpmenu.add_command(label=" \u204E WARP Session Delete", command=registration_delete)
