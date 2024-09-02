@@ -354,7 +354,7 @@ def get_ipaddr(force=False):
 
     if not ipv4 or not ipv6 or not city:
         if get_ipaddr.tries > 1:
-            root.after(3, force_get_ipaddr)
+            root.after(3000, force_get_ipaddr)
 
     get_ipaddr.text = ipv4 + (" - " if ipv4 else "") + city \
             + "\n" + (ipv6 if ipv6 else "-= ipv6 address unavailable =-")
@@ -405,7 +405,7 @@ def get_country_city(ipaddr):
 
     strn = details.city + " (" + details.country + ")"
     if get_country_city.reset > 0:
-        root.after(get_country_city.delay, reset_country_city_dict)
+        root.after(get_country_city.delay*1000, reset_country_city_dict)
         get_country_city.reset = 0
     get_country_city.dict[ipaddr] = strn
     
