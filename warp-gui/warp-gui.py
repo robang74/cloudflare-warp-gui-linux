@@ -708,10 +708,10 @@ warpver_label.pack(pady = (0,10))
 # IP information
 ipaddr_label = Label(root, fg = "MidNightBlue", bg = bgcolor,
     font = ("Arial", 14), text = "\n" + ipaddr_searching)
-ipaddr_label.pack(pady = (20,10))
+ipaddr_label.pack(pady = (20,25))
 
 # Create A Button
-on_button = Button(root, image = off, bd = 0,
+on_button = Button(root, image = off, bd = 0, relief=FLAT,
     activebackground = bgcolor, bg = bgcolor)
 if get_status() == "UP":
     on_button.config(image = on)
