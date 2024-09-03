@@ -45,12 +45,6 @@
 ################################################################################
 # To check the WARP connection: curl https://www.cloudflare.com/cdn-cgi/trace/
 
-# RAF, TODO
-#
-# pgrep -u $USER -alf warp-gui.py | grep -e "[0-9]* python.*[ /]warp-gui.py$"
-# from tkinter import BOTH, NORMAL, ACTIVE, DISABLED
-##  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #
-
 # Import pip3 Module
 from tkinter import *
 from time import sleep
@@ -673,13 +667,9 @@ dl_get_uchar.list = [ [ '\u29bf', '\u24ff' ] ]
 def topmost_toggle():
     prev = root.attributes('-topmost')
     root.attributes("-topmost", not prev)
-    #icon = '\u24FF' if prev else '\u29BE'
     uc_top = dl_get_uchar()
     set_id = int(dl_get_uchar.idx/2)
     menubar.entryconfigure(5, label=f"{uc_top} TOP")
-    #print("menubar:", menubar.entry)
-
-
 
 # create root windows ##########################################################
 
@@ -864,7 +854,7 @@ stats_label_update.warp_stats_last = ""
 stats_label_update.inrun = 0
 
 
-class TestThreading(object):
+class UpdateThread(object):
 
     def __init__(self, interval=1.0):
         self.skip = 0
@@ -1004,6 +994,6 @@ print("\nthis script", filename,
       "\n")
 
 root.config(menu=menubar)
-root.tr = TestThreading()
+root.tr = UpdateThread()
 root.update_idletasks()
 root.mainloop()
