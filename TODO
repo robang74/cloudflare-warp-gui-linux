@@ -1,15 +1,13 @@
 TODO
 
 + light or dark theme or system theme among these two
-+ catch the CTRL+C and terminate correctly
 + add GUI information dialog for authorship notice
 + add GUI information dialog for errors log view
 + choose should be replaced by round+1 trip
-+ close cascading menu when focus is lost
 + instead of dicationary use lru_cache
 + .config file for information to show
-* ipaddr text check for () country before complete
 + ability to change the size of the fonts/window
++ beep() when the connection status changes in background
 
 DONE
 
@@ -18,3 +16,6 @@ v put the running PID under the GUI version
 v check the return code for the http queries
 v disable the IP refresh button during the operation
 v menubar button for the sticky-top flag
+v ipaddr text check for () country before complete
+v catch the CTRL+C and terminate correctly
+v close cascading menu when focus is lost
