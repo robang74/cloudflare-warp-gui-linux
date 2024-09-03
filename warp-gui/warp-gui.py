@@ -1033,6 +1033,11 @@ unexpose_handler.inrun = 0
 
 helpmenu.bind_all("<FocusOut>", unexpose_handler)
 
+
+def get_methods(object):
+    return [method_name for method_name in dir(object) \
+        if callable(getattr(object, method_name))]
+
 ################################################################################
 
 network_has_ipv6 = urllib3.util.connection.HAS_IPV6
