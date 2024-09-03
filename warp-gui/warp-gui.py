@@ -606,6 +606,77 @@ def kill_all_instances(filename=filename):
     sleep(0.1)
     exit()
 
+
+def dl_get_uchar(idx=-1):
+    if idx < 0:
+        idx = dl_get_uchar.idx + 1
+    if idx >= 2 * len(dl_get_uchar.list):
+        idx = 0
+    dl_get_uchar.idx = idx
+    return dl_get_uchar.list[int(idx/2)][int(idx%2)]
+
+dl_get_uchar.idx = -1
+dl_get_uchar.list = [ [ '\u29bf', '\u24ff' ] ]
+
+'''
+# RAF: 4th GENERATION ##########################################################
+#                 00                      01                      02
+        [ '\u29bf', '\u24ff' ], [ '\u272a', '\u24ff' ], [ '\u2732', '\u2731' ] ]
+
+
+# RAF: 3rd GENERATION ##########################################################
+
+#                 00                      01                      02
+        [ '\u24ea', '\u24ff' ], [ '\u24c4', '\u24ff' ], [ '\u24de', '\u24ff' ],
+#                 03                      04                      05
+        [ '\u29bf', '\u24ff' ], [ '\u29be', '\u29bf' ], [ '\u29bf', '\u272a' ],
+#                 06                      07                      08
+        [ '\u2b21', '\u2b22' ], [ '\u2729', '\u272a' ], [ '\u2732', '\u2731' ],
+#                 09                      10                      11
+        [ '\u2662', '\u2666' ], [ '\u2662', '\u2756' ], [ '\u2727', '\u2756' ],
+#                 12                      13                      14
+        [ '\u2705', '\u2714' ] ]
+
+# RAF: 2nd GENERATION ##########################################################
+
+#                 00                      01                      02
+        [ '\u24ea', '\u24ff' ], [ '\u24c4', '\u24ff' ], [ '\u24de', '\u24ff' ],
+#                 03                      04                      05
+        [ '\u29bf', '\u24ff' ], [ '\u29be', '\u29bf' ], [ '\u2b21', '\u2b22' ],
+#                 06                      07                      08
+        [ '\u2662', '\u2666' ], [ '\u2705', '\u2714' ], [ '\u2729', '\u272a' ],
+#                 09                      10                      11
+        [ '\u2727', '\u2756' ], [ '\u2662', '\u2756' ], [ '\u2732', '\u2731' ] ]
+
+# RAF: 1st GENERATION ##########################################################
+
+#                 00                      01                      02
+        [ '\u2206', '\u2207' ], [ '\u22bc', '\u22bd' ], [ '\u24ea', '\u24ff' ],
+#                 03                      04                      05
+        [ '\u24c4', '\u24ff' ], [ '\u24de', '\u24ff' ], [ '\u29bf', '\u24ff' ],
+#                 06                      07                      08
+        [ '\u25c7', '\u25c6' ], [ '\u25c7', '\u25c8' ], [ '\u2662', '\u2756' ],
+#                 09                      10                      11
+        [ '\u2662', '\u2666' ], [ '\u2705', '\u2714' ], [ '\u2729', '\u272a' ],
+#                 12                      13                      14
+        [ '\u2727', '\u2756' ], [ '\u29be', '\u29bf' ], [ '\u29be', '\u2b22' ],
+#                 15                      16                      17
+        [ '\u2b21', '\u2b22' ], [ '\u25c9', '\u2b24' ], [ '\u2732', '\u2731' ],
+#                 18                      19                      20
+        [ '\u25ce', '\u25c9' ], ]
+'''
+
+def topmost_toggle():
+    prev = root.attributes('-topmost')
+    root.attributes("-topmost", not prev)
+    #icon = '\u24FF' if prev else '\u29BE'
+    uc_top = dl_get_uchar()
+    set_id = int(dl_get_uchar.idx/2)
+    menubar.entryconfigure(5, label=f"{uc_top} TOP")
+    #print("menubar:", menubar.entry)
+
+
+
 # create root windows ##########################################################
 
 from functools import partial
@@ -668,11 +739,15 @@ root.resizable(False,False)
 root.iconphoto(True,appicon_init)
 root.config(bg = bgcolor)
 
+uc_top = dl_get_uchar()
+
 menubar = Menu(root, bg = bgcolor, activeborderwidth = 4, relief=GROOVE, fg = "Black")
 helpmenu = Menu(menubar, tearoff=1, font = "Arial 12", title="WARP GUI > MENU")
 menubar.add_cascade(label="\u25BD MENU", compound="left", menu=helpmenu)
 menubar.add_cascade(label="\u205D", compound="left")
 menubar.add_command(label="\u21F1 IP \u21F2",             command=ipaddr_info_update, compound="left", state=DISABLED)
+menubar.add_cascade(label="\u205D", compound="left")
+menubar.add_command(label=f"{uc_top} TOP",                command=topmost_toggle, compound="left")
 
 helpmenu.add_command(label=" \u204E WARP Session Renew ", command=session_renew)
 helpmenu.add_command(label=" \u204E WARP Session Delete", command=registration_delete)
