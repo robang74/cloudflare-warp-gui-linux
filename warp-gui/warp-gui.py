@@ -733,33 +733,37 @@ root.resizable(False,False)
 root.iconphoto(True,appicon_init)
 root.config(bg = bgcolor)
 
-uc_top = dl_get_uchar()
-
 menubar = Menu(root, bg = bgcolor, activeborderwidth = 4, relief=GROOVE, fg = "Black")
-helpmenu = Menu(menubar, tearoff=1, font = "Arial 12", title="WARP GUI > MENU")
-menubar.add_cascade(label="\u25BD MENU", compound="left", menu=helpmenu)
-menubar.add_cascade(label="\u205D", compound="left")
-menubar.add_command(label="\u21F1 IP \u21F2",             command=ipaddr_info_update, compound="left", state=DISABLED)
-menubar.add_cascade(label="\u205D", compound="left")
-menubar.add_command(label=f"{uc_top} TOP",                command=topmost_toggle, compound="left")
 
-helpmenu.add_command(label=" \u204E WARP Session Renew ", command=session_renew)
-helpmenu.add_command(label=" \u204E WARP Session Delete", command=registration_delete)
-helpmenu.add_separator()
-helpmenu.add_command(label="\u2058 DNS Filter: family",   command=partial(set_dns_filter, "full"))
-helpmenu.add_command(label="\u2058 DNS Filter: malware",  command=partial(set_dns_filter, "malware"))
-helpmenu.add_separator()
-helpmenu.add_command(label=" \u2022 WARP Mode: doh",      command=partial(set_mode, "doh"))
-helpmenu.add_command(label=" \u2022 WARP Mode: warp",     command=partial(set_mode, "warp"))
-helpmenu.add_command(label=" \u2022 WARP Mode: warp+doh", command=partial(set_mode, "warp+doh"))
-helpmenu.add_command(label=" \u2022 WARP Mode: tunnel",   command=partial(set_mode, "tunnel_only"))
-helpmenu.add_command(label=" \u2022 WARP Mode: proxy",    command=partial(set_mode, "proxy"))
-helpmenu.add_separator()
-helpmenu.add_command(label="\u21C5 Service Taskbar Icon", command=service_taskbar)
-helpmenu.add_command(label="\u21BA Refresh Information",  command=information_refresh)
-helpmenu.add_separator()
-helpmenu.add_command(label="\u24D8 GUI App Information",  command="", state=DISABLED)
-helpmenu.add_command(label="\u24E7 GUI App Termination",  command=kill_all_instances)
+def create_cascade_menu(menubar=menubar):
+    cm = Menu(menubar, tearoff=1, font = "Arial 12", title="WARP GUI > MENU")
+    cm.add_command(label=" \u204E WARP Session Renew ", command=session_renew)
+    cm.add_command(label=" \u204E WARP Session Delete", command=registration_delete)
+    cm.add_separator()
+    cm.add_command(label="\u2058 DNS Filter: family",   command=partial(set_dns_filter, "full"))
+    cm.add_command(label="\u2058 DNS Filter: malware",  command=partial(set_dns_filter, "malware"))
+    cm.add_separator()
+    cm.add_command(label=" \u2022 WARP Mode: doh",      command=partial(set_mode, "doh"))
+    cm.add_command(label=" \u2022 WARP Mode: warp",     command=partial(set_mode, "warp"))
+    cm.add_command(label=" \u2022 WARP Mode: warp+doh", command=partial(set_mode, "warp+doh"))
+    cm.add_command(label=" \u2022 WARP Mode: tunnel",   command=partial(set_mode, "tunnel_only"))
+    cm.add_command(label=" \u2022 WARP Mode: proxy",    command=partial(set_mode, "proxy"))
+    cm.add_separator()
+    cm.add_command(label="\u21C5 Service Taskbar Icon", command=service_taskbar)
+    cm.add_command(label="\u21BA Refresh Information",  command=information_refresh)
+    cm.add_separator()
+    cm.add_command(label="\u24D8 GUI App Information",  command="", state=DISABLED)
+    cm.add_command(label="\u24E7 GUI App Termination",  command=kill_all_instances)
+    cm.add_separator()
+    return cm
+
+helpmenu = create_cascade_menu()
+
+menubar.add_cascade(label="\u25BD MENU", compound="left", menu=helpmenu)
+menubar.add_command(label="\u205D", compound="left")
+menubar.add_command(label="\u21F1 IP \u21F2",           command=ipaddr_info_update, compound="left", state=DISABLED)
+menubar.add_command(label="\u205D", compound="left")
+menubar.add_command(label=dl_get_uchar() + " TOP",      command=topmost_toggle, compound="left")
 
 # Access information
 acc_label = Label(root, text = "", bg = bgcolor, font = ("Arial", 40, 'bold'))
@@ -992,6 +996,42 @@ signal.signal(signal.SIGINT, ctrlc_handler)
 
 # it seems useless w or w/ signal but keep for further investigation
 # root.bind_all("<Control-C>", ctrlc_handler)
+
+
+def unexpose_handler(event):
+    global helpmenu
+
+    #print("+", event)
+
+    if not 'helpmenu' in globals():
+        #print("1")
+        return
+    try:
+        if helpmenu == None:
+            #print("2")
+            return
+    except:
+        #print("3")
+        return
+    try:
+        hf = helpmenu.focus_get()
+    except:
+        hf = "x"
+
+    if hf ==  None:
+        if unexpose_handler.inrun:
+            #print("4")
+            return
+        unexpose_handler.inrun = 1
+        menubar.entryconfigure(1, menu = None, state = DISABLED)
+        helpmenu.destroy()
+        helpmenu = create_cascade_menu()
+        menubar.entryconfigure(1, menu = helpmenu, state = NORMAL)
+        unexpose_handler.inrun = 0
+
+unexpose_handler.inrun = 0
+
+helpmenu.bind_all("<FocusOut>", unexpose_handler)
 
 ################################################################################
 
