@@ -981,6 +981,20 @@ def set_settings(warp, dnsf):
 
 ################################################################################
 
+import signal
+
+def ctrlc_handler(sig, frame):
+    print(f' -> {filename} received SIGINT and exiting...\n')
+    root.quit()
+
+# this should be setup before calling main loop
+signal.signal(signal.SIGINT, ctrlc_handler)
+
+# it seems useless w or w/ signal but keep for further investigation
+# root.bind_all("<Control-C>", ctrlc_handler)
+
+################################################################################
+
 network_has_ipv6 = urllib3.util.connection.HAS_IPV6
 # This line can enable or disable the IPv6 for 'requests' methods
 urllib3.util.connection.HAS_IPV6 = True
