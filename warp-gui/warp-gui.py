@@ -334,9 +334,10 @@ def get_ipaddr(force=False):
 
     inrun_wait_or_set()
 
-    if force or get_ipaddr.text == "" \
-    or get_ipaddr.text.find(ipaddr_searching) > -1:
+    if force or get_ipaddr.text == "":
         get_ipaddr.tries = 0
+    elif get_ipaddr.city.find("(") < 0:
+        pass
     elif get_ipaddr.ipv4 or get_ipaddr.ipv6:
         return inrun_reset(get_ipaddr.text)
 
