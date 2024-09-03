@@ -550,13 +550,16 @@ update_guiview.inrun = 0
 
 
 def ipaddr_text_set(ipaddr_text=ipaddr_searching):
-    if ipaddr_text.find(ipaddr_searching) > -1:
-        ipaddr_text = "\n"+ipaddr_searching
-        ipaddr_label.config(fg = "DimGray")
+    fgcolor = "DimGray"
+    if ipaddr_text[0] == '\n':
+        pass
+    if ipaddr_text == ipaddr_searching:
+        ipaddr_text = "\n" + ipaddr_searching
     if get_status.last != "UP":
-        ipaddr_label.config(fg = "DimGray")
+        pass
     else:
-        ipaddr_label.config(fg = "MidNightBlue")
+        fgcolor = "MidNightBlue"
+    ipaddr_label.config(fg = fgcolor)
     ipaddr_label.config(text = ipaddr_text)
     ipaddr_label.update_idletasks()
 
