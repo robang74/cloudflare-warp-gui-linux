@@ -900,7 +900,7 @@ class TestThreading(object):
                 update_guiview(status, 0)
             else:
                 stats_label.config(fg = "DimGray")
-                status_icon_update(status, get_access())
+                status_icon_update(status, get_access.last)
 
             sleep(self.interval)
 
