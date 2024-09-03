@@ -768,7 +768,7 @@ helpmenu.add_separator()
 helpmenu.add_command(label="\u21C5 Service Taskbar Icon", command=service_taskbar)
 helpmenu.add_command(label="\u21BA Refresh Information",  command=information_refresh)
 helpmenu.add_separator()
-helpmenu.add_command(label="\u24D8 GUI App Information",  command="")
+helpmenu.add_command(label="\u24D8 GUI App Information",  command="", state=DISABLED)
 helpmenu.add_command(label="\u24E7 GUI App Termination",  command=kill_all_instances)
 
 # Access information
