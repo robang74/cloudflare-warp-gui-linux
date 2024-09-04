@@ -1008,35 +1008,49 @@ signal.signal(signal.SIGINT, ctrlc_handler)
 def unexpose_handler(event):
     global helpmenu
 
-    #print("+", event)
+    def printdbg(*args):
+        if unexpose_handler.dbg:
+            return root.after_idle(print,*args)
+
+    printdbg("+-> event:", event, event.widget)
 
     if not 'helpmenu' in globals():
-        #print("1")
+        printdbg("#1 return \n")
         return
     try:
         if helpmenu == None:
-            #print("2")
+            printdbg("#2 return \n")
             return
     except:
-        #print("3")
+        printdbg("#3 return \n")
         return
     try:
         hf = helpmenu.focus_get()
     except:
         hf = "x"
 
-    if hf ==  None:
+    try:
+        top = root.attributes('-topmost')
+        if top:
+            printdbg("#4 return \n")
+            return
+    except:
+        top = 0
+
+    if hf == None:
         if unexpose_handler.inrun:
-            #print("4")
+            printdbg("#5 return \n")
             return
         unexpose_handler.inrun = 1
-        menubar.entryconfigure(1, menu = None, state = DISABLED)
         helpmenu.destroy()
         helpmenu = create_cascade_menu()
         menubar.entryconfigure(1, menu = helpmenu, state = NORMAL)
         unexpose_handler.inrun = 0
+        printdbg("foucus out done")
+    printdbg("")
 
 unexpose_handler.inrun = 0
+unexpose_handler.dbg = 0
 
 helpmenu.bind_all("<FocusOut>", unexpose_handler)
 
@@ -1066,4 +1080,5 @@ print("\nthis script", filename,
 root.config(menu=menubar)
 root.tr = UpdateThread()
 root.update_idletasks()
+
 root.mainloop()
