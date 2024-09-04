@@ -92,7 +92,7 @@ def inet_get_ipaddr(weburl="ifconfig.me", ipv6=False):
 
     # Send the GET request with the Host header set to the original domain
     try:
-        res = getUrl(url, headers={"Host": weburl[0]})
+        res = getUrl(url, headers={"Host": weburl[0]}, timeout=(1.5,2.0))
     except Exception as e:
         raise(e)
 
@@ -414,7 +414,7 @@ def get_country_city(ipaddr):
 
     try:
         # using the access_token from ipinfo
-        details = get_ipaddr.handler.getDetails(ipaddr)
+        details = get_ipaddr.handler.getDetails(ipaddr, timeout=(0.5,1.0))
     except:
         return ipaddr_errstring
 
