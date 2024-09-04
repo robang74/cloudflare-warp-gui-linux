@@ -1045,6 +1045,10 @@ def get_methods(object):
     return [method_name for method_name in dir(object) \
         if callable(getattr(object, method_name))]
 
+def get_variables(object):
+    return [method_name for method_name in dir(object) if not callable(getattr(object, method_name))] \
+         + [getattr(object, variable_name) for variable_name in vars(object)]
+
 ################################################################################
 
 network_has_ipv6 = urllib3.util.connection.HAS_IPV6
