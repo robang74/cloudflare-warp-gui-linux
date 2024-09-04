@@ -297,7 +297,10 @@ def ipaddr_info_update(enable=0):
 
     if enable:
         try:
-            ipaddr_info_update.tr.join()
+            if get_ipaddr.dbg:
+                print("ipaddr_info_update thread", ipaddr_info_update.tr)
+            if ipaddr_info_update.tr != None:
+                ipaddr_info_update.tr.join()
         except:
             pass
         root.update_idletasks()
@@ -333,6 +336,8 @@ def get_ipaddr(force=False):
     elif get_ipaddr.city.find("(") < 0:
         pass
     elif get_ipaddr.ipv4 or get_ipaddr.ipv6:
+        if get_ipaddr.dbg:
+            print("ipaddr quest avoid, return last value:", get_ipaddr.text)
         return inrun_reset(get_ipaddr.text)
 
     if get_ipaddr.dbg:
@@ -366,6 +371,8 @@ def get_ipaddr(force=False):
         get_ipaddr.ipv6 = ""
 
     if not ipv4 and not ipv6:
+        if get_ipaddr.dbg:
+            print("ipaddr quest failed, still searcing:")
         return inrun_reset(ipaddr_searching + ipaddr_errstring)
 
     get_ipaddr.city = get_country_city(ipv4 if ipv4 else ipv6)
