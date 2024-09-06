@@ -60,8 +60,13 @@ registration_new_cmdline = "warp-cli --accept-tos registration new"
 registration_new_cmdline +=" && warp-cli dns families malware"
 registration_new_cmdline +=" && warp-cli set-mode warp+doh"
 
+ipv6_system_check_cmdline = 'for i in all.disable_ipv6 default.disable_ipv6;'
+ipv6_system_check_cmdline +=' do sysctl net.ipv6.conf.$i; done | grep "= *0"'
+ipv6_system_check_cmdline +=' | wc -l'
+
 ipaddr_errstring = "\n-= error or timeout =-"
 ipaddr_searching = "-=-.-=-.-=-.-=-"
+
 
 ################################################################################
 
@@ -447,6 +452,18 @@ get_country_city.delay = 600 # value in seconds
 get_country_city.reset = get_country_city.delay
 
 
+def ipv6_system_check():
+    retstr = getoutput(ipv6_system_check_cmdline)
+    ipv6_system_check.enabled = (retstr == '2')
+
+ipv6_system_check.enabled = -1
+
+
+ipv6_system_check_thread = Thread(target=ipv6_system_check)
+ipv6_system_check_thread.start()
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
 from tkinter import simpledialog
 
 def enroll():
@@ -798,7 +815,9 @@ if get_status() == "UP":
 else:
     ipaddr_label.config(fg = "DimGray")
 
-Thread(target=acc_info_update).start()
+
+acc_info_update_thread = Thread(target=acc_info_update)
+acc_info_update_thread.start()
 
 ################################################################################
 
@@ -884,6 +903,7 @@ class UpdateThread(object):
         self.skip = 0
 
     def run(self, acc_label):
+        console_infostart_prints()
         while True:
             if self.skip:
                 sleep(0.10)
@@ -1065,20 +1085,37 @@ def get_variables(object):
 
 ################################################################################
 
-network_has_ipv6 = urllib3.util.connection.HAS_IPV6
-# This line can enable or disable the IPv6 for 'requests' methods
-urllib3.util.connection.HAS_IPV6 = True
+def console_infostart_prints():
+    global filename, dir_path
 
-print("\nthis script", filename,
-      "\nrun.py path", dir_path,
-      "\nipaddr url4", ", ".join(get_ipaddr.wurl4),
-      "\nipaddr url6", ", ".join(get_ipaddr.wurl6),
-      "\nnetwork has", ("IPv6" if network_has_ipv6 else "IPv4"),
-       ("enabled" if urllib3.util.connection.HAS_IPV6 else "disabled"),
-      "\n")
+    network_has_ipv6 = urllib3.util.connection.HAS_IPV6
+    # This line can enable or disable the IPv6 for 'requests' methods
+    urllib3.util.connection.HAS_IPV6 = True
+
+    try:
+        ipv6_system_check_thread.join()
+    except:
+        pass
+
+    print("\nthis script", filename,
+          "\nscript path", dir_path,
+          "\nipaddr url4", ", ".join(get_ipaddr.wurl4),
+          "\nipaddr url6", ", ".join(get_ipaddr.wurl6),
+          "\nnetwork has", ("IPv6" if network_has_ipv6 else "IPv4"),
+           ("enabled (1)" if urllib3.util.connection.HAS_IPV6 else "disabled (0)"),
+          "while system IPv6 support is",
+           ("enabled (1)" if ipv6_system_check.enabled else "disabled (0)"),
+          "\n");
+
+    try:
+        acc_info_update_thread.join()
+    except:
+        pass
+
+################################################################################
 
 root.config(menu=menubar)
 root.tr = UpdateThread()
 root.update_idletasks()
-
 root.mainloop()
+
