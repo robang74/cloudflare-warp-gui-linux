@@ -424,9 +424,10 @@ def get_ipaddr(force=False):
             get_ipaddr.text.replace("\n", " "))
 
     get_ipaddr.tries += 1
-    url4 = get_ipaddr.wurl4[get_ipaddr.wuidx]
-    url6 = get_ipaddr.wurl6[get_ipaddr.wuidx]
-    get_ipaddr.wuidx += 1
+    url4 = get_ipaddr.wurl4[0]
+    get_ipaddr.wurl4 = get_ipaddr.wurl4[1:] + get_ipaddr.wurl4[:1]
+    url6 = get_ipaddr.wurl6[0]
+    get_ipaddr.wurl6 = get_ipaddr.wurl6[1:] + get_ipaddr.wurl6[:1]
 
     if get_ipaddr.dbg and get_ipaddr.tries == 1:
         print("ipv4 urls:", url4)
@@ -472,7 +473,6 @@ get_ipaddr.handler = getHandler(get_ipaddr.hadler_token)
 get_ipaddr.wurls = ['ifconfig.me/ip', 'icanhazip.com', 'myip.wtf/text', 'eth0.me']
 get_ipaddr.wurl6 = ['api6.ipify.org/','ip6only.me/ip/'] + get_ipaddr.wurls
 get_ipaddr.wurl4 = ['api.ipify.org/', 'ip4.me/ip/'] + get_ipaddr.wurls
-get_ipaddr.wuidx = randrange(len(get_ipaddr.wurl4))
 get_ipaddr.inrun = 0
 get_ipaddr.text = ""
 get_ipaddr.ipv4 = ""
