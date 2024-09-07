@@ -6,9 +6,8 @@ TODO
 + instead of dicationary use lru_cache
 + .config file for information to show
 + ability to change the size of the fonts/window
-+ beep() when the connection status changes in background
-+ make a new menu voice "WARP settings reset"
 + why name change disrupt recreated helpmenu bahviour? (8a63ffc)
++ use @decoration for try_dict_get() & Co. variables
 
 DONE
 
@@ -23,3 +22,5 @@ v close cascading menu when focus is lost
 v use sysctl to check the system IPv6 settings
 v add a dictionary cache in resolving hostnames
 v choose should be replaced by round+1 trip
+v make a new menu voice "WARP settings reset"
+v beep() when the connection status changes in background
