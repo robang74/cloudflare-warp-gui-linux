@@ -961,6 +961,7 @@ class UpdateThread(object):
 
     def __init__(self, interval=1.00):
         self.skip = 0
+        self.status = ""
         self.interval = interval
         self._event = Event()
         thread = Thread(target=self.run, args=(acc_label,))
@@ -988,6 +989,7 @@ class UpdateThread(object):
                 top|= (root.focus_get() != None)
             except:
                 top = 1
+
             if top == 1:
                 if status == "UP":
                     stats_label_update()
@@ -995,6 +997,12 @@ class UpdateThread(object):
             else:
                 stats_label.config(fg = "DimGray")
                 status_icon_update(status, get_access.last)
+
+            if self.status != status:
+                self.status = status
+                if status in [ "UP", "DN" ]:
+                    root.update_idletasks()
+                    root.bell()
 
             sleep(self.interval)
 
