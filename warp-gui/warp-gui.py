@@ -255,10 +255,12 @@ def update_guiview_by_menu(info_str, err_str=""):
             info_str = err_str
 
     stats_label.config(text = err_str, fg = "OrangeRed")
-    stats_label.update_idletasks()
 
-    update_guiview(get_status(), 0)
     root.tr.resume()
+    stats_label.update_idletasks()
+    update_guiview(get_status(), 0)
+
+
 def settings_reset():
     if get_status.last == "UP":
         slide_switch()
@@ -270,16 +272,16 @@ def settings_reset():
 
 
 def registration_delete():
-    root.tr.pause()
-    err_str = getoutput("warp-cli registration delete")
     ipaddr_text_set()
+    root.tr.pause()
     get_status.last = "RGM"
+    err_str = getoutput("warp-cli registration delete")
     update_guiview_by_menu("registration delete", err_str)
 
 
 def information_refresh():
-    root.tr.pause()
     ipaddr_text_set()
+    root.tr.pause()
     get_status.last = ""
     fnc_dict_rst(inet_get_ipaddr)
     fnc_dict_rst(get_country_city)
@@ -289,6 +291,7 @@ def information_refresh():
 def session_renew():
     global registration_new_cmdline
 
+    ipaddr_text_set()
     root.tr.pause()
 
     if get_settings.warp_mode == 0 or get_settings.warp_dnsf == 0:
@@ -303,7 +306,6 @@ def session_renew():
     if oldval == "UP":
         cmdline += " && warp-cli connect"
 
-    ipaddr_text_set()
     err_str = getoutput("warp-cli registration delete; " + cmdline)
     if oldval == "UP":
         get_status.last = "CN"
@@ -602,7 +604,6 @@ def update_guiview(status, errlog=1):
     if update_guiview.inrun:
         return
     update_guiview.inrun = 1
-    root.tr.pause()
 
     stats_err = 0
     if errlog and get_status.err != "":
@@ -620,13 +621,14 @@ def update_guiview(status, errlog=1):
     stats_label.update_idletasks()
 
     if status != "CN" and status != "DC":
+        root.tr.pause()
         Thread(target=acc_info_update).start()
         Thread(target=change_ip_text).start()
         Thread(target=get_settings).start()
         slide_update(status)
+        root.tr.resume()
         sleep(0.10)
 
-    root.tr.resume()
     update_guiview.inrun = 0
 
 update_guiview.inrun = 0
@@ -652,7 +654,9 @@ def slide_switch():
         return
     slide_switch.inrun = 1
 
+    ipaddr_text_set()
     root.tr.pause()
+
     on_button.config(state = DISABLED)
     on_button.update_idletasks()
 
@@ -668,10 +672,8 @@ def slide_switch():
         retstr = getoutput("warp-cli --accept-tos connect")
     status_label.update_idletasks()
 
-    ipaddr_text_set()
-    auto_update_guiview()
-
     root.tr.resume()
+    auto_update_guiview()
     slide_switch.inrun = 0
 
 slide_switch.inrun = 0
