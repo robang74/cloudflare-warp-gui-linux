@@ -67,6 +67,44 @@ ipv6_system_check_cmdline +=' | wc -l'
 ipaddr_errstring = "\n-= error or timeout =-"
 ipaddr_searching = "-=-.-=-.-=-.-=-"
 
+################################################################################
+
+''' TO APPEND AFETR A FUNCTION
+
+the_function_name.dict = dict()
+#
+# dictionary caching delay value:
+#   -N = perment cache (no reset)
+#    0 = no any cache (disabled)
+#    N = cache reset (delayed)
+#
+the_function_name.delay = 600 # value in seconds
+the_function_name.reset = the_function_name.delay
+
+'''
+
+def try_dict_get(key):
+    func = eval(func_name(1))
+    if func.delay:
+        try:
+            value = func.dict[key]
+            return value
+        except:
+            pass
+    return None
+
+
+def rst_dict_set(key, val):
+    func = eval(func_name(1))
+    if func.reset > 0:
+        root.after(func.delay << 10, partial(fnc_dict_rst, func))
+        func.reset = 0
+    func.dict[key] = val
+
+
+def fnc_dict_rst(func):
+    func.dict = dict()
+    func.reset = func.delay
 
 ################################################################################
 
@@ -74,17 +112,24 @@ from socket import getaddrinfo, AF_INET, AF_INET6
 
 def inet_get_ipaddr(weburl="ifconfig.me", ipv6=False):
     weburl = weburl.split('/',1)
+    dmname = weburl[0]
     url = ""
+
+    keydct = ("ipv6:" if ipv6 else "ipv4:") + dmname
+    restrn = try_dict_get(keydct)
+    if restrn != None:
+        return restrn
+
     if ipv6:
         # Resolve to an IPv6 address only (family=AF_INET6)
-        ip_info = getaddrinfo(weburl[0], 80, family=AF_INET6)
+        ip_info = getaddrinfo(dmname, 80, family=AF_INET6)
         # Construct the URL using the IPv6 address
         # IPv6 addresses should be enclosed in []
         ip_address = ip_info[0][4][0]
         url = f"http://[{ip_address}]/"
     else:
         # Resolve to an IPv4 address only (family=AF_INET)
-        ip_info = getaddrinfo(weburl[0], 80, family=AF_INET)
+        ip_info = getaddrinfo(dmname, 80, family=AF_INET)
         # Construct the URL using the IPv4 address
         ip_address = ip_info[0][4][0]
         url = f"http://{ip_address}/"
@@ -97,7 +142,7 @@ def inet_get_ipaddr(weburl="ifconfig.me", ipv6=False):
 
     # Send the GET request with the Host header set to the original domain
     try:
-        res = getUrl(url, headers={"Host": weburl[0]}, timeout=(1.5,2.0))
+        res = getUrl(url, headers={"Host": dmname}, timeout=(1.5,2.0))
     except Exception as e:
         raise(e)
 
@@ -105,7 +150,22 @@ def inet_get_ipaddr(weburl="ifconfig.me", ipv6=False):
         print("WRN> inet_get_ipaddr() return code:", res.status_code)
 
     # RAF: return code 206 is partial content and should be discarded
-    return res.text.split('\n',1)[0] if res.status_code != 206 else ""
+    if res.status_code == 206:
+        return ""
+
+    restrn = res.text.split('\n',1)[0]
+    rst_dict_set(keydct, restrn)
+    return restrn
+
+inet_get_ipaddr.dict = dict()
+#
+# dictionary caching delay value:
+#   -N = perment cache (no reset)
+#    0 = no any cache (disabled)
+#    N = cache reset (delayed)
+#
+inet_get_ipaddr.delay = 600 # value in seconds
+inet_get_ipaddr.reset = inet_get_ipaddr.delay
 
 
 def ipv4_get_ipaddr(url="ifconfig.me"):
@@ -213,7 +273,8 @@ def information_refresh():
     root.tr.pause()
     ipaddr_text_set()
     get_status.last = ""
-    chk_dict_rst(get_country_city)
+    fnc_dict_rst(inet_get_ipaddr)
+    fnc_dict_rst(get_country_city)
     update_guiview_by_menu("information refresh")
 
 
@@ -404,30 +465,6 @@ get_ipaddr.ipv6 = ""
 get_ipaddr.city = ""
 get_ipaddr.tries = 0
 get_ipaddr.dbg = 0
-
-
-def try_dict_get(key):
-    func = eval(func_name(1))
-    if func.delay:
-        try:
-            value = func.dict[key]
-            return value
-        except:
-            pass
-    return None
-
-
-def rst_dict_set(key, val):
-    func = eval(func_name(1))
-    if func.reset > 0:
-        root.after(func.delay << 10, partial(chk_dict_rst, func))
-        func.reset = 0
-    func.dict[key] = val
-
-
-def chk_dict_rst(func):
-    func.dict = dict()
-    func.reset = func.delay
 
 
 def get_country_city(ipaddr):
