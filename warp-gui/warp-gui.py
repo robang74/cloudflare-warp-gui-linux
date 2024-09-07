@@ -243,7 +243,7 @@ get_status.reg = True
 get_status.inrun = 0
 
 
-def update_guiview_by_menu(err_str, info_str=""):
+def update_guiview_by_menu(info_str, err_str=""):
     if err_str != "":
         err_str = err_str.split("\n")
         if err_str[0] == "Success":
@@ -274,7 +274,7 @@ def registration_delete():
     err_str = getoutput("warp-cli registration delete")
     ipaddr_text_set()
     get_status.last = "RGM"
-    update_guiview_by_menu(err_str, "registration delete")
+    update_guiview_by_menu("registration delete", err_str)
 
 
 def information_refresh():
@@ -311,7 +311,7 @@ def session_renew():
         get_status.last = "DN"
 
     set_settings(warp_mode_old, warp_dnsf_old)
-    update_guiview_by_menu(err_str, "WARP session renew")
+    update_guiview_by_menu("WARP session renew", err_str)
 
 
 def get_access():
