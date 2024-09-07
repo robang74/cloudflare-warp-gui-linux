@@ -213,7 +213,7 @@ def information_refresh():
     root.tr.pause()
     ipaddr_text_set()
     get_status.last = ""
-    reset_country_city_dict()
+    chk_dict_rst(get_country_city)
     update_guiview_by_menu("information refresh")
 
 
@@ -406,9 +406,28 @@ get_ipaddr.tries = 0
 get_ipaddr.dbg = 0
 
 
-def reset_country_city_dict():
-    get_country_city.dict = dict()
-    get_country_city.reset = get_country_city.delay
+def try_dict_get(key):
+    func = eval(func_name(1))
+    if func.delay:
+        try:
+            value = func.dict[key]
+            return value
+        except:
+            pass
+    return None
+
+
+def rst_dict_set(key, val):
+    func = eval(func_name(1))
+    if func.reset > 0:
+        root.after(func.delay << 10, partial(chk_dict_rst, func))
+        func.reset = 0
+    func.dict[key] = val
+
+
+def chk_dict_rst(func):
+    func.dict = dict()
+    func.reset = func.delay
 
 
 def get_country_city(ipaddr):
@@ -417,12 +436,9 @@ def get_country_city(ipaddr):
     if ipaddr == "":
         return ""
 
-    if get_country_city.delay:
-        try:
-            city = get_country_city.dict[ipaddr]
-            return city
-        except:
-            pass
+    strn = try_dict_get(ipaddr)
+    if strn != None:
+        return strn
 
     try:
         # using the access_token from ipinfo
@@ -431,10 +447,7 @@ def get_country_city(ipaddr):
         return ipaddr_errstring
 
     strn = details.city + " (" + details.country + ")"
-    if get_country_city.reset > 0:
-        root.after(get_country_city.delay*1000, reset_country_city_dict)
-        get_country_city.reset = 0
-    get_country_city.dict[ipaddr] = strn
+    rst_dict_set(ipaddr, strn)
     
     if get_ipaddr.dbg:
         print("get_country_city.dict =", get_country_city.dict)
