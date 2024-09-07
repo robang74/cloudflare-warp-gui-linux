@@ -1154,7 +1154,7 @@ def console_infostart_prints():
     except:
         pass
 
-    print("\nthis script", filename,
+    print("\nthis script", filename, "for", gui_version_str,
           "\nscript path", dir_path,
           "\nipaddr url4", ", ".join(get_ipaddr.wurl4),
           "\nipaddr url6", ", ".join(get_ipaddr.wurl6),
