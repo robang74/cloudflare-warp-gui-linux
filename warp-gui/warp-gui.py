@@ -374,7 +374,7 @@ def ipaddr_info_update(enable=0):
     if enable:
         try:
             if get_ipaddr.dbg:
-                print("ipaddr_info_update thread", ipaddr_info_update.tr)
+                print("ipaddr_info_update thread", str(ipaddr_info_update.tr))
             if ipaddr_info_update.tr != None:
                 ipaddr_info_update.tr.join()
         except:
@@ -402,10 +402,9 @@ def force_get_ipaddr():
 
 from random import randrange, seed
 from ipinfo import getHandler
-from time import process_time
+from time import process_time_ns, monotonic
 
-seed(process_time())
-
+seed(process_time_ns())
 
 def get_ipaddr(force=False):
     global ipaddr_searching, ipaddr_errstring
@@ -418,10 +417,14 @@ def get_ipaddr(force=False):
         pass
     elif get_ipaddr.ipv4 or get_ipaddr.ipv6:
         if get_ipaddr.dbg:
-            print("ipaddr quest avoid, return last value:", get_ipaddr.text)
+            print("get_ipaddr(last):", get_ipaddr.text.replace("\n", " "),
+                str(int((monotonic()-get_ipaddr.start) * 1000)) + " ms"
+                    if get_ipaddr.start else "")
+        get_ipaddr.start = monotonic()
         return inrun_reset(get_ipaddr.text)
 
     if get_ipaddr.dbg:
+        get_ipaddr.start = monotonic()
         print("get_ipaddr(try, ipaddr):", get_ipaddr.tries,
             get_ipaddr.text.replace("\n", " "))
 
@@ -464,7 +467,8 @@ def get_ipaddr(force=False):
 
     if get_ipaddr.dbg:
         print("get_ipaddr(try, ipstr):", get_ipaddr.tries,
-            get_ipaddr.text.replace("\n", " "))
+            get_ipaddr.text.replace("\n", " "),
+            int((monotonic()-get_ipaddr.start) * 1000), "ms")
 
     ipaddr_info_update(1)
 
@@ -476,6 +480,7 @@ get_ipaddr.wurls = ['ifconfig.me/ip', 'icanhazip.com', 'myip.wtf/text', 'eth0.me
 get_ipaddr.wurl6 = ['api6.ipify.org/','ip6only.me/ip/'] + get_ipaddr.wurls
 get_ipaddr.wurl4 = ['api.ipify.org/', 'ip4.me/ip/'] + get_ipaddr.wurls
 get_ipaddr.inrun = 0
+get_ipaddr.start = 0
 get_ipaddr.text = ""
 get_ipaddr.ipv4 = ""
 get_ipaddr.ipv6 = ""
@@ -954,7 +959,7 @@ stats_label_update.inrun = 0
 
 class UpdateThread(object):
 
-    def __init__(self, interval=1.0):
+    def __init__(self, interval=1.00):
         self.skip = 0
         self.interval = interval
         self._event = Event()
