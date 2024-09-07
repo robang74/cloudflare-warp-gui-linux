@@ -259,6 +259,14 @@ def update_guiview_by_menu(err_str, info_str=""):
 
     update_guiview(get_status(), 0)
     root.tr.resume()
+def settings_reset():
+    if get_status.last == "UP":
+        slide_switch()
+    ipaddr_text_set()
+    root.tr.pause()
+    get_status.last = "RGM"
+    err_str = getoutput("warp-cli settings reset")
+    update_guiview_by_menu("settings reset", err_str)
 
 
 def registration_delete():
@@ -820,6 +828,7 @@ def create_cascade_menu(menubar=menubar):
     cm = Menu(menubar, tearoff=1, font = "Arial 12", title="WARP GUI > MENU")
     cm.add_command(label=" \u204E WARP Session Renew ", command=session_renew)
     cm.add_command(label=" \u204E WARP Session Delete", command=registration_delete)
+    cm.add_command(label=" \u204E WARP Settings Reset", command=settings_reset)
     cm.add_separator()
     cm.add_command(label="\u2058 DNS Filter: family",   command=partial(set_dns_filter, "full"))
     cm.add_command(label="\u2058 DNS Filter: malware",  command=partial(set_dns_filter, "malware"))
