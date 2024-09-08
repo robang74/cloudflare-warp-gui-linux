@@ -64,6 +64,11 @@ ipv6_system_check_cmdline = 'for i in all.disable_ipv6 default.disable_ipv6;'
 ipv6_system_check_cmdline +=' do sysctl net.ipv6.conf.$i; done | grep "= *0"'
 ipv6_system_check_cmdline +=' | wc -l'
 
+show_weather_xterm_cmdline = 'xterm -bg black +wf -hold +ls -fa "Ubuntu Mono"'
+show_weather_xterm_cmdline +=' -fs 12 -uc +ah +bc +aw -geometry "126x42+500+90"'
+show_weather_xterm_cmdline +=' -title "Weekly Weather Forecast"  +l +cm'
+show_weather_xterm_cmdline +=' -e /bin/bash -c "curl wttr.in/${city}"'
+
 ipaddr_errstring = "\n-= error or timeout =-"
 ipaddr_searching = "-=-.-=-.-=-.-=-"
 
@@ -505,6 +510,7 @@ def get_country_city(ipaddr):
     except:
         return ipaddr_errstring
 
+    get_country_city.city = details.city
     strn = details.city + " (" + details.country + ")"
     rst_dict_set(ipaddr, strn)
     
@@ -513,6 +519,7 @@ def get_country_city(ipaddr):
 
     return strn
 
+get_country_city.city = ""
 get_country_city.dict = dict()
 #
 # geolocalization caching delay value:
@@ -597,6 +604,7 @@ def wait_status():
 def change_ip_text():
     ipaddr_text_set(get_ipaddr())
     on_button.config(state = NORMAL)
+    menubar.entryconfigure(7, state=NORMAL)
     ipaddr_label.update_idletasks()
     on_button.update_idletasks()
 
@@ -645,6 +653,11 @@ def ipaddr_text_set(ipaddr_text=ipaddr_searching):
         pass
     if ipaddr_text == ipaddr_searching:
         ipaddr_text = "\n" + ipaddr_searching
+        menubar.entryconfigure(7, state=DISABLED)
+        if show_weather_xterm.tr != None:
+            #TODO: close the thred/process here
+            show_weather_xterm.tr = None
+        get_country_city.city = ""
     if get_status.last != "UP":
         pass
     else:
@@ -760,12 +773,40 @@ dl_get_uchar.list = [ [ '\u29bf', '\u24ff' ] ]
         [ '\u25ce', '\u25c9' ], ]
 '''
 
+
 def topmost_toggle():
     prev = root.attributes('-topmost')
     root.attributes("-topmost", not prev)
     uc_top = dl_get_uchar()
     set_id = int(dl_get_uchar.idx/2)
     menubar.entryconfigure(5, label=f"{uc_top} TOP")
+
+
+def show_weather_xterm_thread(city=""):
+    if not city:
+        city = get_country_city.city
+
+    print("show_weather_xterm_thread:", city)
+    city = get_country_city.city
+    cmdl = show_weather_xterm_cmdline.replace("${city}", city)
+    show_weather_xterm_thread.retstr = getoutput(cmdl)
+    show_weather_xterm.tr = None
+    menubar.entryconfigure(7, state=NORMAL)
+
+show_weather_xterm_thread.retstr = ""
+
+
+def show_weather_xterm():
+    if show_weather_xterm.tr != None:
+        show_weather_xterm.tr.join()
+        return
+
+    show_weather_xterm.tr = Thread(target=show_weather_xterm_thread)
+    menubar.entryconfigure(7, state=DISABLED)
+    show_weather_xterm.tr.start()
+    #print("show_weather_xterm start:", show_weather_xterm.tr.ident)
+
+show_weather_xterm.tr = None
 
 # create root windows ##########################################################
 
@@ -856,11 +897,21 @@ def create_cascade_menu(menubar=menubar):
 
 helpmenu = create_cascade_menu()
 
+def add_vertical_separator(text="", menubar=menubar):
+    if not text:
+        text="\u205D"
+    menubar.add_command(label=text, compound="left", state=DISABLED)
+
 menubar.add_cascade(label="\u25BD MENU", compound="left", menu=helpmenu)
-menubar.add_command(label="\u205D", compound="left")
-menubar.add_command(label="\u21F1 IP \u21F2",           command=ipaddr_info_update, compound="left", state=DISABLED)
-menubar.add_command(label="\u205D", compound="left")
-menubar.add_command(label=dl_get_uchar() + " TOP",      command=topmost_toggle, compound="left")
+add_vertical_separator()
+menubar.add_command(label="\u21F1 IP \u21F2",
+    command=ipaddr_info_update, compound="left", state=DISABLED)
+add_vertical_separator()
+menubar.add_command(label=dl_get_uchar() + " TOP",
+    command=topmost_toggle, compound="left")
+add_vertical_separator(" -=- ")
+menubar.add_command(label="\u2991\u2600\u26a1\u2602\u2992",
+    command=show_weather_xterm, compound="right", state=DISABLED)
 
 # Access information
 acc_label = Label(root, text = "", bg = bgcolor, font = ("Arial", 40, 'bold'))
