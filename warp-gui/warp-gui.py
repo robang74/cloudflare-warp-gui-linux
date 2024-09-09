@@ -66,8 +66,8 @@ ipv6_system_check_cmdline +=' | wc -l'
 
 strn = 'xterm -bg black +wf -hold +ls -fa "Ubuntu Mono" -fs 12 -uc +ah +bc +aw'
 strn +=' -geometry "125x41+500+90" -title "Weekly Weather Forecast"  +l +cm -e'
-strn +=' /bin/bash -c "echo Weather report: ${city}, loading...;'
-show_weather_xterm_cmdline = strn + 'curl wttr.in/${city}"'
+strn +=' /bin/bash -c "echo \033[?25l Weather report: ${city}, loading...;'
+show_weather_xterm_cmdline = strn + 'curl wttr.in/${city}; printf \a"'
 
 ipaddr_errstring = "\n-= error or timeout =-"
 ipaddr_searching = "-=-.-=-.-=-.-=-"
