@@ -64,10 +64,10 @@ ipv6_system_check_cmdline = 'for i in all.disable_ipv6 default.disable_ipv6;'
 ipv6_system_check_cmdline +=' do sysctl net.ipv6.conf.$i; done | grep "= *0"'
 ipv6_system_check_cmdline +=' | wc -l'
 
-show_weather_xterm_cmdline = 'xterm -bg black +wf -hold +ls -fa "Ubuntu Mono"'
-show_weather_xterm_cmdline +=' -fs 12 -uc +ah +bc +aw -geometry "126x42+500+90"'
-show_weather_xterm_cmdline +=' -title "Weekly Weather Forecast"  +l +cm'
-show_weather_xterm_cmdline +=' -e /bin/bash -c "curl wttr.in/${city}"'
+strn = 'xterm -bg black +wf -hold +ls -fa "Ubuntu Mono" -fs 12 -uc +ah +bc +aw'
+strn +=' -geometry "125x41+500+90" -title "Weekly Weather Forecast"  +l +cm -e'
+strn +=' /bin/bash -c "echo Weather report: ${city}, loading...;'
+show_weather_xterm_cmdline = strn + 'curl wttr.in/${city}"'
 
 ipaddr_errstring = "\n-= error or timeout =-"
 ipaddr_searching = "-=-.-=-.-=-.-=-"
@@ -654,6 +654,7 @@ def ipaddr_text_set(ipaddr_text=ipaddr_searching):
     if ipaddr_text == ipaddr_searching:
         ipaddr_text = "\n" + ipaddr_searching
         menubar.entryconfigure(7, state=DISABLED)
+        menubar.update_idletasks()
         if show_weather_xterm.tr != None:
             #TODO: close the thred/process here
             show_weather_xterm.tr = None
@@ -786,8 +787,8 @@ def show_weather_xterm_thread(city=""):
     if not city:
         city = get_country_city.city
 
-    print("show_weather_xterm_thread:", city)
     city = get_country_city.city
+    print("show_weather_xterm:", city)
     cmdl = show_weather_xterm_cmdline.replace("${city}", city)
     show_weather_xterm_thread.retstr = getoutput(cmdl)
     show_weather_xterm.tr = None
@@ -803,6 +804,7 @@ def show_weather_xterm():
 
     show_weather_xterm.tr = Thread(target=show_weather_xterm_thread)
     menubar.entryconfigure(7, state=DISABLED)
+    menubar.update_idletasks()
     show_weather_xterm.tr.start()
     #print("show_weather_xterm start:", show_weather_xterm.tr.ident)
 
