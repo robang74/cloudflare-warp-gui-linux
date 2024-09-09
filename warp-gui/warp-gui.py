@@ -502,6 +502,8 @@ def get_country_city(ipaddr):
 
     strn = try_dict_get(ipaddr)
     if strn != None:
+        if not get_country_city.city:
+            get_country_city.city = get_country_city.last
         return strn
 
     try:
@@ -511,6 +513,8 @@ def get_country_city(ipaddr):
         return ipaddr_errstring
 
     get_country_city.city = details.city
+    if get_country_city.city:
+        get_country_city.last = get_country_city.last
     strn = details.city + " (" + details.country + ")"
     rst_dict_set(ipaddr, strn)
     
@@ -520,6 +524,7 @@ def get_country_city(ipaddr):
     return strn
 
 get_country_city.city = ""
+get_country_city.last = ""
 get_country_city.dict = dict()
 #
 # geolocalization caching delay value:
