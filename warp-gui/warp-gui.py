@@ -291,6 +291,7 @@ def registration_delete():
 
 
 def information_refresh():
+    kill_weather_xterm()
     ipaddr_text_set()
     root.tr.pause()
     get_status.last = ""
@@ -517,9 +518,12 @@ def get_country_city(ipaddr):
         # using the access_token from ipinfo
         details = get_ipaddr_info.handler.getDetails(ipaddr, timeout=(0.5,1.0))
     except:
+        kill_weather_xterm()
         return ipaddr_errstring
 
     self.city = details.city
+    if self.city != self.last:
+        kill_weather_xterm()
     self.last = self.city
 
     strn = details.city + " (" + details.country + ")"
@@ -713,6 +717,7 @@ slide_switch.inrun = 0
 
 
 def kill_all_instances(filename=filename):
+    kill_weather_xterm()
     if not filename:
         return
 
@@ -795,6 +800,17 @@ def topmost_toggle():
     uc_top = dl_get_uchar()
     set_id = int(dl_get_uchar.idx/2)
     menubar.entryconfigure(5, label=f"{uc_top} TOP")
+
+
+def kill_weather_xterm(sig=15):
+    pid = show_weather_xterm.pid
+    set_weather_button_state(1)
+    if not pid > 0:
+        return
+    try:
+        kill(pid, sig)
+    except:
+        pass
 
 
 def show_weather_xterm():
