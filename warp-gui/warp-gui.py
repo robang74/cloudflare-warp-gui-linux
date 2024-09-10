@@ -502,14 +502,15 @@ get_ipaddr_info.dbg = 0
 
 def get_country_city(ipaddr):
     global ipaddr_errstring
+    self = get_country_city
 
     if ipaddr == "":
         return ""
 
     strn = try_dict_get(ipaddr)
     if strn != None:
-        if not get_country_city.city:
-            get_country_city.city = get_country_city.last
+        if not self.city:
+            self.city = self.last
         return strn
 
     try:
@@ -518,12 +519,14 @@ def get_country_city(ipaddr):
     except:
         return ipaddr_errstring
 
-    get_country_city.last = get_country_city.city = details.city
+    self.city = details.city
+    self.last = self.city
+
     strn = details.city + " (" + details.country + ")"
     rst_dict_set(ipaddr, strn)
     
     if get_ipaddr_info.dbg:
-        print("get_country_city.dict =", get_country_city.dict)
+        print("get_country_city.dict =", self.dict)
 
     return strn
 
