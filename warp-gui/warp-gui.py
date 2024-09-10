@@ -512,9 +512,7 @@ def get_country_city(ipaddr):
     except:
         return ipaddr_errstring
 
-    get_country_city.city = details.city
-    if get_country_city.city:
-        get_country_city.last = get_country_city.last
+    get_country_city.last = get_country_city.city = details.city
     strn = details.city + " (" + details.country + ")"
     rst_dict_set(ipaddr, strn)
     
