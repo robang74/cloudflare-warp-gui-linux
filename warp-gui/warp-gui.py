@@ -518,7 +518,6 @@ def get_country_city(ipaddr):
         # using the access_token from ipinfo
         details = get_ipaddr_info.handler.getDetails(ipaddr, timeout=(0.5,1.0))
     except:
-        kill_weather_xterm()
         return ipaddr_errstring
 
     self.city = details.city
@@ -804,13 +803,13 @@ def topmost_toggle():
 
 def kill_weather_xterm(sig=15):
     pid = show_weather_xterm.pid
-    set_weather_button_state(1)
     if not pid > 0:
         return
     try:
         kill(pid, sig)
     except:
         pass
+    set_weather_button_state(1)
 
 
 def show_weather_xterm():
@@ -1180,10 +1179,21 @@ def set_settings(warp, dnsf):
 ################################################################################
 
 import signal
+import atexit
+
+def handle_exit(*args):
+    try:
+        kill_weather_xterm()
+    except:
+        pass
+    root.quit()
+
+atexit.register(handle_exit)
+signal.signal(signal.SIGTERM, handle_exit)
 
 def ctrlc_handler(sig, frame):
     print(f' -> {filename} received SIGINT and exiting...\n')
-    root.quit()
+    handle_exit()
 
 # this should be setup before calling main loop
 signal.signal(signal.SIGINT, ctrlc_handler)
@@ -1191,6 +1201,7 @@ signal.signal(signal.SIGINT, ctrlc_handler)
 # it seems useless w or w/ signal but keep for further investigation
 # root.bind_all("<Control-C>", ctrlc_handler)
 
+################################################################################
 
 def unexpose_handler(event):
     global helpmenu
