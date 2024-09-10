@@ -45,7 +45,6 @@
 ################################################################################
 # To check the WARP connection: curl https://www.cloudflare.com/cdn-cgi/trace/
 
-# Import pip3 Module
 from tkinter import *
 from time import sleep
 from os import getpid, path, kill, environ
@@ -65,11 +64,12 @@ ipv6_system_check_cmdline = 'for i in all.disable_ipv6 default.disable_ipv6;'
 ipv6_system_check_cmdline +=' do sysctl net.ipv6.conf.$i; done | grep "= *0"'
 ipv6_system_check_cmdline +=' | wc -l'
 
-strn = 'xterm -bg black +wf -hold +ls -fa "Ubuntu Mono" -fs 12 -uc +ah +bc +aw'
-strn +=' -geometry "125x41+500+90" -title "Weekly Weather Forecast"  +l +cm -e'
-strn +=' ${SHELL} -c "echo \033[?25l Weather report: ${city}, loading...;'
-strn +=' curl -q wttr.in/${city} -m 5; printf \a" >/dev/null 2>&1 & echo $!'
-show_weather_xterm_cmdline = strn   # cities almanac wttr.in/newyork
+show_weather_xterm_title = "Weekly Weather Forecast"
+strn =  'xterm -bg black +wf -hold +ls -fa "Ubuntu Mono" -fs 12 -uc +ah +bc +aw'
+strn +=f' -geometry "130x40+500+90" -title "{show_weather_xterm_title}"  +l +cm'
+strn += ' -e ${SHELL} -c "echo; echo \ Weather report: ${city} loading...;'
+strn += ' curl -qsNm 5 wttr.in/${city}?Fp | sed -e \'\$d\'; printf \033[?25l\a"'
+show_weather_xterm_cmdline = strn + ' >/dev/null 2>&1 & echo $!'
 
 ipaddr_errstring = "\n-= error or timeout =-"
 ipaddr_searching = "-=-.-=-.-=-.-=-"
