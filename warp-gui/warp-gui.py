@@ -74,6 +74,8 @@ show_weather_xterm_cmdline = strn   # cities almanac wttr.in/newyork
 ipaddr_errstring = "\n-= error or timeout =-"
 ipaddr_searching = "-=-.-=-.-=-.-=-"
 
+def T_POLLING_MS(): return 100
+
 ################################################################################
 
 ''' TO APPEND AFETR A FUNCTION
@@ -806,7 +808,7 @@ def show_weather_xterm():
 
     def wait_weather_xterm(pid):
         if is_pid_running(pid):
-            root.after(100, wait_weather_xterm, pid)
+            root.after(T_POLLING_MS(), wait_weather_xterm, pid)
         else:
             set_weather_button_state(1)
 
