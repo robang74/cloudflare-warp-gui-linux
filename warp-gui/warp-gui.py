@@ -604,12 +604,22 @@ def wait_status():
     return status
 
 
+def set_weather_button_state(state):
+    if state == "update":
+        state = (show_weather_xterm.tr == None)
+    elif state:
+        show_weather_xterm.tr = None
+    menubar.entryconfigure(7, state=(NORMAL if state else DISABLED))
+    menubar.update_idletasks()
+
+
 def change_ipaddr_text():
-    ipaddr_text_set(get_ipaddr_info())
-    on_button.config(state = NORMAL)
-    menubar.entryconfigure(7, state=NORMAL)
-    ipaddr_label.update_idletasks()
-    on_button.update_idletasks()
+    text = get_ipaddr_info()
+    if text != ipaddr_label.cget("text"):
+        ipaddr_text_set(text)
+        set_weather_button_state("update")
+        on_button.config(state = NORMAL)
+        on_button.update_idletasks()
 
 
 def auto_update_guiview(errlog=1):
@@ -656,11 +666,7 @@ def ipaddr_text_set(ipaddr_text=ipaddr_searching):
         pass
     if ipaddr_text == ipaddr_searching:
         ipaddr_text = "\n" + ipaddr_searching
-        menubar.entryconfigure(7, state=DISABLED)
-        menubar.update_idletasks()
-        if show_weather_xterm.tr != None:
-            #TODO: close the thred/process here
-            show_weather_xterm.tr = None
+        set_weather_button_state(0)
         get_country_city.city = ""
     if get_status.last != "UP":
         pass
@@ -794,21 +800,20 @@ def show_weather_xterm_thread(city=""):
     print("show_weather_xterm:", city)
     cmdl = show_weather_xterm_cmdline.replace("${city}", city)
     show_weather_xterm_thread.retstr = getoutput(cmdl)
-    show_weather_xterm.tr = None
-    menubar.entryconfigure(7, state=NORMAL)
+    set_weather_button_state(1)
 
 show_weather_xterm_thread.retstr = ""
 
 
 def show_weather_xterm():
     if show_weather_xterm.tr != None:
+        print("BUG> show_weather_xterm(): this should not had been happened!")
         show_weather_xterm.tr.join()
-        return
+        show_weather_xterm.tr = None
 
     show_weather_xterm.tr = Thread(target=show_weather_xterm_thread)
-    menubar.entryconfigure(7, state=DISABLED)
-    menubar.update_idletasks()
     show_weather_xterm.tr.start()
+    set_weather_button_state(0)
     #print("show_weather_xterm start:", show_weather_xterm.tr.ident)
 
 show_weather_xterm.tr = None
