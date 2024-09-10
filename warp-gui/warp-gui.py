@@ -48,13 +48,14 @@
 # Import pip3 Module
 from tkinter import *
 from time import sleep
-from os import getpid, path, kill
+from os import getpid, path, kill, environ
 from subprocess import getoutput
 from requests import get as getUrl, urllib3
 from threading import Thread, Event
 
 filename = path.basename(__file__)
 dir_path = path.dirname(path.realpath(__file__))
+shellbin = "/bin/bash"
 
 registration_new_cmdline = "warp-cli --accept-tos registration new"
 registration_new_cmdline +=" && warp-cli dns families malware"
@@ -66,7 +67,7 @@ ipv6_system_check_cmdline +=' | wc -l'
 
 strn = 'xterm -bg black +wf -hold +ls -fa "Ubuntu Mono" -fs 12 -uc +ah +bc +aw'
 strn +=' -geometry "125x41+500+90" -title "Weekly Weather Forecast"  +l +cm -e'
-strn +=' /bin/bash -c "echo \033[?25l Weather report: ${city}, loading...;'
+strn +=' ${SHELL} -c "echo \033[?25l Weather report: ${city}, loading...;'
 strn +=' curl -q wttr.in/${city} -m 5; printf \a" >/dev/null 2>&1 & echo $!'
 show_weather_xterm_cmdline = strn   # cities almanac wttr.in/newyork
 
@@ -812,6 +813,7 @@ def show_weather_xterm():
     set_weather_button_state(0)
     city = get_country_city.city
     cmdl = show_weather_xterm_cmdline.replace("${city}", city)
+    cmdl = cmdl.replace("${SHELL}", shellbin)
     retstrn = getoutput(cmdl)
     pid = int(retstrn)
     if pid > 0:
@@ -1233,7 +1235,7 @@ def get_variables(object):
 ################################################################################
 
 def console_infostart_prints():
-    global filename, dir_path
+    global filename, dir_path, shellbin
 
     network_has_ipv6 = urllib3.util.connection.HAS_IPV6
     # This line can enable or disable the IPv6 for 'requests' methods
@@ -1244,15 +1246,18 @@ def console_infostart_prints():
     except:
         pass
 
-    print("\nthis script", filename, "for", gui_version_str,
-          "\nscript path", dir_path,
-          "\nipaddr url4", ", ".join(get_ipaddr_info.wurl4),
-          "\nipaddr url6", ", ".join(get_ipaddr_info.wurl6),
-          "\nnetwork has", ("IPv6" if network_has_ipv6 else "IPv4"),
+    strn = environ.get('SHELL')
+    if strn: shellbin = strn
+
+    print(f"\nthis script {filename} for {gui_version_str} uses {shellbin}",
+           "\nscript path", dir_path,
+           "\nipaddr url4", ", ".join(get_ipaddr_info.wurl4),
+           "\nipaddr url6", ", ".join(get_ipaddr_info.wurl6),
+           "\nnetwork has", ("IPv6" if network_has_ipv6 else "IPv4"),
            ("enabled (1)" if urllib3.util.connection.HAS_IPV6 else "disabled (0)"),
-          "while system IPv6 support is",
+            "while system IPv6 support is",
            ("enabled (1)" if ipv6_system_check.enabled else "disabled (0)"),
-          "\n");
+           "\n");
 
     try:
         acc_info_update_thread.join()
