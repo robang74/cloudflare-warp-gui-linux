@@ -35,26 +35,8 @@ if [ "$HOME" == "" ]; then
     err=1
 fi
 
-if ! which python3 | grep -q /usr/bin/python3; then
-    echo
-    echo "WARNING: /usr/bin/python3 is not in execution path"
-    echo
-    echo "HOW2FIX: sudo apt-get install python3 -y"
-    echo
-    err=1
-fi
-
-if ! which warp-cli >/dev/null; then
-    echo
-    echo "WARNING: warp-cli is not in execution path"
-    echo
-    echo "HOW2FIX: sudo apt-get install cloudflare-warp -y"
-    echo
-    err=1
-fi
-
-for i in python3-tk; do
-    if ! apt-cache search $i | grep -qe "^$i "; then
+for i in pip3 python3 warp-cli dpkg; do
+    if ! which $i >/dev/null; then
         echo
         echo "WARNING: $i package is not installed"
         echo
@@ -64,19 +46,29 @@ for i in python3-tk; do
     fi
 done
 
-if ! which pip3 >/dev/null; then
+if ! which python3 | grep -q /usr/bin/python3; then
     echo
-    echo "WARNING: pip3 package is not installed"
-    echo
-    echo "HOW2FIX: sudo apt-get install pip3 -y"
+    echo "WARNING: /usr/bin/python3 is not in execution path"
     echo
     err=1
 fi
 
-for i in ipinfo requests; do
-    if ! pip3 list | grep -we "^$i" >/dev/null; then
+for i in python3-tk xterm curl sed procps; do
+    if ! dpkg -l $i >/dev/null; then
         echo
-        echo "WARNING: pip3 $i module is not installed"
+        echo "WARNING: $i package is not installed"
+        echo
+        echo "HOW2FIX: sudo apt-get install $i -y"
+        echo
+        err=1
+    fi
+done
+
+for i in ipinfo requests tkinter time os subprocess threading socket sys \
+    random functools signal atexit; do
+    if ! python3 -c "import $i" 2>/dev/null; then
+        echo
+        echo "WARNING: pip3 module which import '$i' is not installed"
         echo
         echo "HOW2FIX: pip3 install $i"
         echo
