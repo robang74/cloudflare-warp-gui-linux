@@ -48,7 +48,7 @@
 # Import pip3 Module
 from tkinter import *
 from time import sleep
-from os import getpid, path
+from os import getpid, path, kill
 from subprocess import getoutput
 from requests import get as getUrl, urllib3
 from threading import Thread, Event
@@ -67,7 +67,8 @@ ipv6_system_check_cmdline +=' | wc -l'
 strn = 'xterm -bg black +wf -hold +ls -fa "Ubuntu Mono" -fs 12 -uc +ah +bc +aw'
 strn +=' -geometry "125x41+500+90" -title "Weekly Weather Forecast"  +l +cm -e'
 strn +=' /bin/bash -c "echo \033[?25l Weather report: ${city}, loading...;'
-show_weather_xterm_cmdline = strn + 'curl -q wttr.in/${city} -m 5; printf \a"'
+strn +=' curl -q wttr.in/${city} -m 5; printf \a" >/dev/null 2>&1 & echo $!'
+show_weather_xterm_cmdline = strn   # cities almanac wttr.in/newyork
 
 ipaddr_errstring = "\n-= error or timeout =-"
 ipaddr_searching = "-=-.-=-.-=-.-=-"
@@ -606,9 +607,9 @@ def wait_status():
 
 def set_weather_button_state(state):
     if state == "update":
-        state = (show_weather_xterm.tr == None)
+        state = (show_weather_xterm.pid < 0)
     elif state:
-        show_weather_xterm.tr = None
+        show_weather_xterm.pid = -1
     menubar.entryconfigure(7, state=(NORMAL if state else DISABLED))
     menubar.update_idletasks()
 
@@ -792,31 +793,36 @@ def topmost_toggle():
     menubar.entryconfigure(5, label=f"{uc_top} TOP")
 
 
-def show_weather_xterm_thread(city=""):
-    if not city:
-        city = get_country_city.city
-
-    city = get_country_city.city
-    print("show_weather_xterm:", city)
-    cmdl = show_weather_xterm_cmdline.replace("${city}", city)
-    show_weather_xterm_thread.retstr = getoutput(cmdl)
-    set_weather_button_state(1)
-
-show_weather_xterm_thread.retstr = ""
-
-
 def show_weather_xterm():
-    if show_weather_xterm.tr != None:
-        print("BUG> show_weather_xterm(): this should not had been happened!")
-        show_weather_xterm.tr.join()
-        show_weather_xterm.tr = None
 
-    show_weather_xterm.tr = Thread(target=show_weather_xterm_thread)
-    show_weather_xterm.tr.start()
+    def is_pid_running(pid):
+        try:
+            kill(pid, 0)
+        except OSError:
+            return False
+        else:
+            return True
+
+    def wait_weather_xterm(pid):
+        if is_pid_running(pid):
+            root.after(100, wait_weather_xterm, pid)
+        else:
+            set_weather_button_state(1)
+
     set_weather_button_state(0)
-    #print("show_weather_xterm start:", show_weather_xterm.tr.ident)
+    city = get_country_city.city
+    cmdl = show_weather_xterm_cmdline.replace("${city}", city)
+    retstrn = getoutput(cmdl)
+    pid = int(retstrn)
+    if pid > 0:
+        show_weather_xterm.pid = pid
+        print("show_weather_xterm:", city, show_weather_xterm.pid)
+        Thread(target=wait_weather_xterm, args=(pid,)).start()
+    else:
+        show_weather_xterm.pid = -1
+        print("WRN> show_weather_xterm failed:", retstrn)
 
-show_weather_xterm.tr = None
+show_weather_xterm.pid = -1
 
 # create root windows ##########################################################
 
