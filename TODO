@@ -9,7 +9,6 @@ TODO
 + why name change disrupt recreated helpmenu bahviour? (8a63ffc)
 + use @decoration for try_dict_get() & Co. variables
 + wttr.in weather forecast service in white
-+ start xterm with & $! to stop it with kill
 
 DONE
 
@@ -27,4 +26,8 @@ v choose should be replaced by round+1 trip
 v make a new menu voice "WARP settings reset"
 v beep() when the connection status changes in background
 v wttr.in weather forecast service integrated
-v use setterm --cursor off for xterm
+v use setterm --cursor off for xterm (used 033[?25l, instead)
+v start wttr.in xterm with & $! to stop it with kill
+v use root.after(100,..) instead of sleep(0.10)
+v kill down wttr.in xterm when ipaddr refresh or app exits
+v wttr.in cities with spaces requires + .replace()
