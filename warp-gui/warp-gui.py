@@ -830,6 +830,9 @@ def show_weather_xterm():
 
     set_weather_button_state(0)
     city = get_country_city.city
+    if not city:
+        return
+
     cmdl = show_weather_xterm_cmdline.replace("${city}", city)
     cmdl = cmdl.replace("${SHELL}", shellbin)
     retstrn = getoutput(cmdl)
