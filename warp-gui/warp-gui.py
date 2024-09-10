@@ -115,7 +115,7 @@ def fnc_dict_rst(func):
 
 from socket import getaddrinfo, AF_INET, AF_INET6
 
-def inet_get_ipaddr(weburl="ifconfig.me", ipv6=False):
+def inet_get_ipaddr_info(weburl="ifconfig.me", ipv6=False):
     weburl = weburl.split('/',1)
     dmname = weburl[0]
     url = ""
@@ -142,8 +142,8 @@ def inet_get_ipaddr(weburl="ifconfig.me", ipv6=False):
     if len(weburl) > 1:
         url+= weburl[1]
 
-    if get_ipaddr.dbg:
-        print("inet_get_ipaddr:", weburl, url)
+    if get_ipaddr_info.dbg:
+        print("inet_get_ipaddr_info:", weburl, url)
 
     # Send the GET request with the Host header set to the original domain
     try:
@@ -152,7 +152,7 @@ def inet_get_ipaddr(weburl="ifconfig.me", ipv6=False):
         raise(e)
 
     if res.status_code != 200:
-        print("WRN> inet_get_ipaddr() return code:", res.status_code)
+        print("WRN> inet_get_ipaddr_info() return code:", res.status_code)
 
     # RAF: return code 206 is partial content and should be discarded
     if res.status_code == 206:
@@ -162,22 +162,22 @@ def inet_get_ipaddr(weburl="ifconfig.me", ipv6=False):
     rst_dict_set(keydct, restrn)
     return restrn
 
-inet_get_ipaddr.dict = dict()
+inet_get_ipaddr_info.dict = dict()
 #
 # dictionary caching delay value:
 #   -N = perment cache (no reset)
 #    0 = no any cache (disabled)
 #    N = cache reset (delayed)
 #
-inet_get_ipaddr.delay = 600 # value in seconds
-inet_get_ipaddr.reset = inet_get_ipaddr.delay
+inet_get_ipaddr_info.delay = 600 # value in seconds
+inet_get_ipaddr_info.reset = inet_get_ipaddr_info.delay
 
 
-def ipv4_get_ipaddr(url="ifconfig.me"):
-    return inet_get_ipaddr(url, 0)
+def ipv4_get_ipaddr_info(url="ifconfig.me"):
+    return inet_get_ipaddr_info(url, 0)
 
-def ipv6_get_ipaddr(url="ifconfig.me"):
-    return inet_get_ipaddr(url, 1)
+def ipv6_get_ipaddr_info(url="ifconfig.me"):
+    return inet_get_ipaddr_info(url, 1)
 
 ################################################################################
 
@@ -237,7 +237,7 @@ def get_status(wait=0):
         status = "ERR"
 
     if status != get_status.last:
-        get_ipaddr.text = ""
+        get_ipaddr_info.text = ""
         get_status.last = status
 
     return inrun_reset(status)
@@ -288,7 +288,7 @@ def information_refresh():
     ipaddr_text_set()
     root.tr.pause()
     get_status.last = ""
-    fnc_dict_rst(inet_get_ipaddr)
+    fnc_dict_rst(inet_get_ipaddr_info)
     fnc_dict_rst(get_country_city)
     update_guiview_by_menu("information refresh")
 
@@ -373,12 +373,12 @@ def cf_info():
 
 
 def ipaddr_info_update(enable=0):
-    if get_ipaddr.dbg:
+    if get_ipaddr_info.dbg:
         print("ipaddr_info_update: ", enable)
 
     if enable:
         try:
-            if get_ipaddr.dbg:
+            if get_ipaddr_info.dbg:
                 print("ipaddr_info_update thread", str(ipaddr_info_update.tr))
             if ipaddr_info_update.tr != None:
                 ipaddr_info_update.tr.join()
@@ -392,16 +392,16 @@ def ipaddr_info_update(enable=0):
         inrun_wait_or_set()
         menubar.entryconfigure(3, state = DISABLED)
         menubar.update_idletasks()
-        ipaddr_info_update.tr = Thread(target=force_get_ipaddr)
+        ipaddr_info_update.tr = Thread(target=force_get_ipaddr_info)
         ipaddr_info_update.tr.start()
 
 ipaddr_info_update.tr = None
 ipaddr_info_update.inrun = 0
 
 
-def force_get_ipaddr():
+def force_get_ipaddr_info():
     ipaddr_text_set()
-    get_ipaddr(True)
+    get_ipaddr_info(True)
 
 ################################################################################
 
@@ -411,87 +411,87 @@ from time import process_time_ns, monotonic
 
 seed(process_time_ns())
 
-def get_ipaddr(force=False):
+def get_ipaddr_info(force=False):
     global ipaddr_searching, ipaddr_errstring
 
     inrun_wait_or_set()
 
-    if force or get_ipaddr.text == "":
-        get_ipaddr.tries = 0
-    elif get_ipaddr.city.find("(") < 0:
+    if force or get_ipaddr_info.text == "":
+        get_ipaddr_info.tries = 0
+    elif get_ipaddr_info.city.find("(") < 0:
         pass
-    elif get_ipaddr.ipv4 or get_ipaddr.ipv6:
-        if get_ipaddr.dbg:
-            print("get_ipaddr(last):", get_ipaddr.text.replace("\n", " "),
-                str(int((monotonic()-get_ipaddr.start) * 1000)) + " ms"
-                    if get_ipaddr.start else "")
-        get_ipaddr.start = monotonic()
-        return inrun_reset(get_ipaddr.text)
+    elif get_ipaddr_info.ipv4 or get_ipaddr_info.ipv6:
+        if get_ipaddr_info.dbg:
+            print("get_ipaddr_info(last):", get_ipaddr_info.text.replace("\n", " "),
+                str(int((monotonic()-get_ipaddr_info.start) * 1000)) + " ms"
+                    if get_ipaddr_info.start else "")
+        get_ipaddr_info.start = monotonic()
+        return inrun_reset(get_ipaddr_info.text)
 
-    if get_ipaddr.dbg:
-        get_ipaddr.start = monotonic()
-        print("get_ipaddr(try, ipaddr):", get_ipaddr.tries,
-            get_ipaddr.text.replace("\n", " "))
+    if get_ipaddr_info.dbg:
+        get_ipaddr_info.start = monotonic()
+        print("get_ipaddr_info(try, ipaddr):", get_ipaddr_info.tries,
+            get_ipaddr_info.text.replace("\n", " "))
 
-    get_ipaddr.tries += 1
-    url4 = get_ipaddr.wurl4[0]
-    get_ipaddr.wurl4 = get_ipaddr.wurl4[1:] + get_ipaddr.wurl4[:1]
-    url6 = get_ipaddr.wurl6[0]
-    get_ipaddr.wurl6 = get_ipaddr.wurl6[1:] + get_ipaddr.wurl6[:1]
+    get_ipaddr_info.tries += 1
+    url4 = get_ipaddr_info.wurl4[0]
+    get_ipaddr_info.wurl4 = get_ipaddr_info.wurl4[1:] + get_ipaddr_info.wurl4[:1]
+    url6 = get_ipaddr_info.wurl6[0]
+    get_ipaddr_info.wurl6 = get_ipaddr_info.wurl6[1:] + get_ipaddr_info.wurl6[:1]
 
-    if get_ipaddr.dbg and get_ipaddr.tries == 1:
+    if get_ipaddr_info.dbg and get_ipaddr_info.tries == 1:
         print("ipv4 urls:", url4)
         print("ipv6 urls:", url6)
 
     ipv4 = ipv6 = ""
     try:
-        ipv4 = ipv4_get_ipaddr(url4)
-        get_ipaddr.ipv4 = ipv4
+        ipv4 = ipv4_get_ipaddr_info(url4)
+        get_ipaddr_info.ipv4 = ipv4
     except Exception as e:
-        if 1 or get_ipaddr.dbg:
-            print(f"ERR> ipv4_get_ipaddr({url4}) failed({get_ipaddr.tries}) -",
+        if 1 or get_ipaddr_info.dbg:
+            print(f"ERR> ipv4_get_ipaddr_info({url4}) failed({get_ipaddr_info.tries}) -",
                 str(e))
-        get_ipaddr.ipv4 = ""
+        get_ipaddr_info.ipv4 = ""
     try:
-        ipv6 = ipv6_get_ipaddr(url6)
-        get_ipaddr.ipv6 = ipv6
+        ipv6 = ipv6_get_ipaddr_info(url6)
+        get_ipaddr_info.ipv6 = ipv6
     except Exception as e:
-        if 1 or get_ipaddr.dbg:
-            print(f"ERR> ipv6_get_ipaddr({url6}) failed({get_ipaddr.tries}) -",
+        if 1 or get_ipaddr_info.dbg:
+            print(f"ERR> ipv6_get_ipaddr_info({url6}) failed({get_ipaddr_info.tries}) -",
                 str(e))
-        get_ipaddr.ipv6 = ""
+        get_ipaddr_info.ipv6 = ""
 
     if not ipv4 and not ipv6:
-        if get_ipaddr.dbg:
+        if get_ipaddr_info.dbg:
             print("ipaddr quest failed, still searcing:")
         return inrun_reset(ipaddr_searching + ipaddr_errstring)
 
-    get_ipaddr.city = get_country_city(ipv4 if ipv4 else ipv6)
-    get_ipaddr.text = ipv4 + (" - " if ipv4 else "") + get_ipaddr.city \
+    get_ipaddr_info.city = get_country_city(ipv4 if ipv4 else ipv6)
+    get_ipaddr_info.text = ipv4 + (" - " if ipv4 else "") + get_ipaddr_info.city \
             + "\n" + (ipv6 if ipv6 else "-= ipv6 address missing =-")
 
-    if get_ipaddr.dbg:
-        print("get_ipaddr(try, ipstr):", get_ipaddr.tries,
-            get_ipaddr.text.replace("\n", " "),
-            int((monotonic()-get_ipaddr.start) * 1000), "ms")
+    if get_ipaddr_info.dbg:
+        print("get_ipaddr_info(try, ipstr):", get_ipaddr_info.tries,
+            get_ipaddr_info.text.replace("\n", " "),
+            int((monotonic()-get_ipaddr_info.start) * 1000), "ms")
 
     ipaddr_info_update(1)
 
-    return inrun_reset(get_ipaddr.text)
+    return inrun_reset(get_ipaddr_info.text)
 
-get_ipaddr.hadler_token = ""
-get_ipaddr.handler = getHandler(get_ipaddr.hadler_token)
-get_ipaddr.wurls = ['ifconfig.me/ip', 'icanhazip.com', 'myip.wtf/text', 'eth0.me']
-get_ipaddr.wurl6 = ['api6.ipify.org/','ip6only.me/ip/'] + get_ipaddr.wurls
-get_ipaddr.wurl4 = ['api.ipify.org/', 'ip4.me/ip/'] + get_ipaddr.wurls
-get_ipaddr.inrun = 0
-get_ipaddr.start = 0
-get_ipaddr.text = ""
-get_ipaddr.ipv4 = ""
-get_ipaddr.ipv6 = ""
-get_ipaddr.city = ""
-get_ipaddr.tries = 0
-get_ipaddr.dbg = 0
+get_ipaddr_info.hadler_token = ""
+get_ipaddr_info.handler = getHandler(get_ipaddr_info.hadler_token)
+get_ipaddr_info.wurls = ['ifconfig.me/ip', 'icanhazip.com', 'myip.wtf/text', 'eth0.me']
+get_ipaddr_info.wurl6 = ['api6.ipify.org/','ip6only.me/ip/'] + get_ipaddr_info.wurls
+get_ipaddr_info.wurl4 = ['api.ipify.org/', 'ip4.me/ip/'] + get_ipaddr_info.wurls
+get_ipaddr_info.inrun = 0
+get_ipaddr_info.start = 0
+get_ipaddr_info.text = ""
+get_ipaddr_info.ipv4 = ""
+get_ipaddr_info.ipv6 = ""
+get_ipaddr_info.city = ""
+get_ipaddr_info.tries = 0
+get_ipaddr_info.dbg = 0
 
 
 def get_country_city(ipaddr):
@@ -508,7 +508,7 @@ def get_country_city(ipaddr):
 
     try:
         # using the access_token from ipinfo
-        details = get_ipaddr.handler.getDetails(ipaddr, timeout=(0.5,1.0))
+        details = get_ipaddr_info.handler.getDetails(ipaddr, timeout=(0.5,1.0))
     except:
         return ipaddr_errstring
 
@@ -516,7 +516,7 @@ def get_country_city(ipaddr):
     strn = details.city + " (" + details.country + ")"
     rst_dict_set(ipaddr, strn)
     
-    if get_ipaddr.dbg:
+    if get_ipaddr_info.dbg:
         print("get_country_city.dict =", get_country_city.dict)
 
     return strn
@@ -605,7 +605,7 @@ def wait_status():
 
 
 def change_ip_text():
-    ipaddr_text_set(get_ipaddr())
+    ipaddr_text_set(get_ipaddr_info())
     on_button.config(state = NORMAL)
     menubar.entryconfigure(7, state=NORMAL)
     ipaddr_label.update_idletasks()
@@ -944,11 +944,10 @@ if get_status() == "UP":
 else:
     ipaddr_label.config(fg = "DimGray")
 
+################################################################################
 
 acc_info_update_thread = Thread(target=acc_info_update)
 acc_info_update_thread.start()
-
-################################################################################
 
 on_button.config(command = slide_switch, state = DISABLED)
 on_button.pack(pady = 0)
@@ -1236,8 +1235,8 @@ def console_infostart_prints():
 
     print("\nthis script", filename, "for", gui_version_str,
           "\nscript path", dir_path,
-          "\nipaddr url4", ", ".join(get_ipaddr.wurl4),
-          "\nipaddr url6", ", ".join(get_ipaddr.wurl6),
+          "\nipaddr url4", ", ".join(get_ipaddr_info.wurl4),
+          "\nipaddr url6", ", ".join(get_ipaddr_info.wurl6),
           "\nnetwork has", ("IPv6" if network_has_ipv6 else "IPv4"),
            ("enabled (1)" if urllib3.util.connection.HAS_IPV6 else "disabled (0)"),
           "while system IPv6 support is",
