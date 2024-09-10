@@ -604,7 +604,7 @@ def wait_status():
     return status
 
 
-def change_ip_text():
+def change_ipaddr_text():
     ipaddr_text_set(get_ipaddr_info())
     on_button.config(state = NORMAL)
     menubar.entryconfigure(7, state=NORMAL)
@@ -639,7 +639,7 @@ def update_guiview(status, errlog=1):
     if status != "CN" and status != "DC":
         root.tr.pause()
         Thread(target=acc_info_update).start()
-        Thread(target=change_ip_text).start()
+        Thread(target=change_ipaddr_text).start()
         Thread(target=get_settings).start()
         slide_update(status)
         root.tr.resume()
