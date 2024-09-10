@@ -1029,12 +1029,12 @@ stats_label_update.inrun = 0
 
 class UpdateThread(object):
 
-    def __init__(self, interval=1.00):
+    def __init__(self, interval=1000):
         self.skip = 0
         self.status = ""
         self.interval = interval
         self._event = Event()
-        thread = Thread(target=self.run, args=(acc_label,))
+        thread = Thread(target=self.run)
         thread.daemon = True
         thread.start()
 
@@ -1046,35 +1046,34 @@ class UpdateThread(object):
         self._event.set()
         self.skip = 0
 
-    def run(self, acc_label):
+    def task(self):
+        if self.skip:
+            return root.after(T_POLLING_MS(), self.task)
+        status = get_status()
+        try:
+            top = root.attributes('-topmost')
+            top|= (root.focus_get() != None)
+        except:
+            top = 1
+
+        if top == 1:
+            if status == "UP":
+                stats_label_update()
+            update_guiview(status, 0)
+        else:
+            stats_label.config(fg = "DimGray")
+            status_icon_update(status, get_access.last)
+
+        if self.status != status:
+            self.status = status
+            if status in [ "UP", "DN" ]:
+                root.update_idletasks()
+                root.bell()
+        root.after(self.interval, self.task)
+
+    def run(self):
         console_infostart_prints()
-        while True:
-            if self.skip:
-                sleep(0.10)
-                continue
-
-            status = get_status()
-            try:
-                top = root.attributes('-topmost')
-                top|= (root.focus_get() != None)
-            except:
-                top = 1
-
-            if top == 1:
-                if status == "UP":
-                    stats_label_update()
-                update_guiview(status, 0)
-            else:
-                stats_label.config(fg = "DimGray")
-                status_icon_update(status, get_access.last)
-
-            if self.status != status:
-                self.status = status
-                if status in [ "UP", "DN" ]:
-                    root.update_idletasks()
-                    root.bell()
-
-            sleep(self.interval)
+        self.task()
 
 ################################################################################
 
