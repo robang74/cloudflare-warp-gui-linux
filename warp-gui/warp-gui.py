@@ -599,15 +599,11 @@ def service_taskbar():
 
 
 def wait_status():
-    while True:
-        stats_label.config(text = "")
-
-        status = get_status()
-        if status != "CN" and status != "DC":
-            return status
-        sleep(0.10)
-
-    return status
+    stats_label.config(text = "")
+    status = get_status()
+    if status != "CN" and status != "DC":
+        return status
+    root.after(T_POLLING_MS(), wait_status)
 
 
 def set_weather_button_state(state):
