@@ -841,6 +841,7 @@ def show_weather_xterm():
     if not city:
         return
 
+    city = city.replace(" ", "+")
     cmdl = show_weather_xterm_cmdline.replace("${city}", city)
     cmdl = cmdl.replace("${SHELL}", shellbin)
     retstrn = getoutput(cmdl)
