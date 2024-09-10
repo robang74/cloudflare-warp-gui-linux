@@ -716,21 +716,29 @@ slide_switch.inrun = 0
 
 
 def kill_all_instances(filename=filename):
+    global show_weather_xterm_title
+
     kill_weather_xterm()
     if not filename:
-        return
+        handle_exit()
 
-    cmd_kill_all = '"s/\([0-9]*\) python.*[ /]' + filename + '$/\\\\1/p"'
-    cmd_kill_all = 'pgrep -u $USER -alf ' + filename + ' | sed -n ' \
-                  + cmd_kill_all + " | xargs kill"
+    ereg = '"s/\([0-9]*\) python.*[ /]' + filename + '$/\\\\1/p"'
+    cmda = 'pgrep -u $USER -alf ' + filename + ' | sed -ne ' \
+          + ereg + " | grep -v $PPID"
+
+    ereg = '"s/\([ 0-9]*\) .*title ' + show_weather_xterm_title + ' .*/\\\\1/p"'
+    cmdx = 'pgrep -u $USER -alf xterm | sed -ne ' + ereg
+
     ret_str = ""
     try:
-        ret_str = getoutput(cmd_kill_all)
+        ret_str = getoutput(f"for i in $({cmdx}); do kill $i; kill -1 $i; done")
+        ret_str+= getoutput(f"for i in $({cmda}); do kill $i; kill -1 $i; done")
     except Exception as e:
         print(f"ERR> kill_all_instances(): {ret_str}\n\n", str(e))
-
-    sleep(0.1)
-    exit()
+    else:
+        if not ret_str: ret_str = "(OK)"
+        print(f"kill_all_instances:\n  {cmdx}\n  {cmda}\nreturns: {ret_str}\n")
+    handle_exit()
 
 
 def dl_get_uchar(idx=-1):
