@@ -199,13 +199,14 @@ func_name = lambda n=0: _getframe(n+1).f_code.co_name
 # just a operational serialisation just for optimisation. Hence a flag is ok.
 #
 ##  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #
-def inrun_wait_or_set(wait=0):
-    func = eval(func_name(1))
+
+def inrun_wait_or_set(wait=0, func=None):
+    if not func:
+        func = eval(func_name(1))
+    if func.inrun and not wait > 0:
+        wait = T_POLLING_MS()
     if wait > 0:
-        sleep(wait)
-    else:
-        while func.inrun:
-            sleep(0.10)
+        return root.after(wait, inrun_wait_or_set, 0, func)
     func.inrun = 1
 
 
@@ -213,6 +214,7 @@ def inrun_reset(val=None):
     func = eval(func_name(1))
     func.inrun = 0
     return val
+
 ##  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #
 
 def get_status(wait=0):
@@ -220,7 +222,7 @@ def get_status(wait=0):
 
     status = getoutput("warp-cli status")
     if status.find("Success") == 0:
-        return get_status(0.5)
+        return get_status(500)
     status = status.split("\n")[0]
     status_err = status.split(".")
     get_status.err = "\n".join(status_err)
