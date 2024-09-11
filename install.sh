@@ -54,7 +54,7 @@ if ! which python3 | grep -q /usr/bin/python3; then
 fi
 
 for i in python3-tk xterm curl sed procps; do
-    if ! dpkg -l $i >/dev/null; then
+    if ! dpkg -l $i | grep -e "^ii" >/dev/null; then
         echo
         echo "WARNING: $i package is not installed"
         echo
