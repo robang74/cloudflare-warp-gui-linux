@@ -420,71 +420,72 @@ seed(process_time_ns())
 
 def get_ipaddr_info(force=False):
     global ipaddr_searching, ipaddr_errstring
+    self = get_ipaddr_info
 
     inrun_wait_or_set()
 
-    if force or get_ipaddr_info.text == "":
-        get_ipaddr_info.tries = 0
-    elif get_ipaddr_info.city.find("(") < 0:
+    if force or self.text == "":
+        self.tries = 0
+    elif self.city.find("(") < 0:
         pass
-    elif get_ipaddr_info.ipv4 or get_ipaddr_info.ipv6:
-        if get_ipaddr_info.dbg:
-            print("get_ipaddr_info(last):", get_ipaddr_info.text.replace("\n", " "),
-                str(int((monotonic()-get_ipaddr_info.start) * 1000)) + " ms"
-                    if get_ipaddr_info.start else "")
-        get_ipaddr_info.start = monotonic()
-        return inrun_reset(get_ipaddr_info.text)
+    elif self.ipv4 or self.ipv6:
+        if self.dbg:
+            print(f"{self.__name__}(last):", self.text.replace("\n", " "),
+                str(int((monotonic()-self.start) * 1000)) + " ms"
+                    if self.start else "")
+        self.start = monotonic()
+        return inrun_reset(self.text)
 
-    if get_ipaddr_info.dbg:
-        get_ipaddr_info.start = monotonic()
-        print("get_ipaddr_info(try, ipaddr):", get_ipaddr_info.tries,
-            get_ipaddr_info.text.replace("\n", " "))
+    if self.dbg:
+        self.start = monotonic()
+        print(f"{self.__name__}(try, ipaddr):", self.tries,
+            self.text.replace("\n", " "))
 
-    get_ipaddr_info.tries += 1
-    url4 = get_ipaddr_info.wurl4[0]
-    get_ipaddr_info.wurl4 = get_ipaddr_info.wurl4[1:] + get_ipaddr_info.wurl4[:1]
-    url6 = get_ipaddr_info.wurl6[0]
-    get_ipaddr_info.wurl6 = get_ipaddr_info.wurl6[1:] + get_ipaddr_info.wurl6[:1]
+    self.tries += 1
+    url4 = self.wurl4[0]
+    self.wurl4 = self.wurl4[1:] + self.wurl4[:1]
+    url6 = self.wurl6[0]
+    self.wurl6 = self.wurl6[1:] + self.wurl6[:1]
 
-    if get_ipaddr_info.dbg and get_ipaddr_info.tries == 1:
+    if self.dbg and self.tries == 1:
         print("ipv4 urls:", url4)
         print("ipv6 urls:", url6)
 
     ipv4 = ipv6 = ""
     try:
         ipv4 = ipv4_get_ipaddr_info(url4)
-        get_ipaddr_info.ipv4 = ipv4
+        self.ipv4 = ipv4
     except Exception as e:
-        if 1 or get_ipaddr_info.dbg:
-            print(f"ERR> ipv4_get_ipaddr_info({url4}) failed({get_ipaddr_info.tries}) -",
+        if 1 or self.dbg:
+            print(f"ERR> ipv4_get_ipaddr_info({url4}) failed({self.tries}) -",
                 str(e))
-        get_ipaddr_info.ipv4 = ""
+        self.ipv4 = ""
     try:
         ipv6 = ipv6_get_ipaddr_info(url6)
-        get_ipaddr_info.ipv6 = ipv6
+        self.ipv6 = ipv6
     except Exception as e:
-        if 1 or get_ipaddr_info.dbg:
-            print(f"ERR> ipv6_get_ipaddr_info({url6}) failed({get_ipaddr_info.tries}) -",
+        if 1 or self.dbg:
+            print(f"ERR> ipv6_get_ipaddr_info({url6}) failed({self.tries}) -",
                 str(e))
-        get_ipaddr_info.ipv6 = ""
+        self.ipv6 = ""
 
     if not ipv4 and not ipv6:
-        if get_ipaddr_info.dbg:
-            print("ipaddr quest failed, still searcing:")
+        if self.dbg:
+            print("ipaddr quest failed, but still trying")
         return inrun_reset(ipaddr_searching + ipaddr_errstring)
 
-    get_ipaddr_info.city = get_country_city(ipv4 if ipv4 else ipv6)
-    get_ipaddr_info.text = ipv4 + (" - " if ipv4 else "") + get_ipaddr_info.city \
+    self.city = get_country_city(ipv4 if ipv4 else ipv6)
+    self.text = ipv4 + (" - " if ipv4 else "") + self.city \
             + "\n" + (ipv6 if ipv6 else "-= ipv6 address missing =-")
 
-    if get_ipaddr_info.dbg:
-        print("get_ipaddr_info(try, ipstr):", get_ipaddr_info.tries,
-            get_ipaddr_info.text.replace("\n", " "),
-            int((monotonic()-get_ipaddr_info.start) * 1000), "ms")
+    if self.dbg:
+        print(f"{self.__name__}(try, ipstr):", self.tries,
+            self.text.replace("\n", " "),
+            int((monotonic()-self.start) * 1000), "ms")
 
     ipaddr_info_update(1)
 
-    return inrun_reset(get_ipaddr_info.text)
+    return inrun_reset(self.text)
 
 get_ipaddr_info.hadler_token = ""
 get_ipaddr_info.handler = getHandler(get_ipaddr_info.hadler_token)
