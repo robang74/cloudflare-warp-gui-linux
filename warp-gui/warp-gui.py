@@ -76,6 +76,10 @@ ipaddr_searching = "-=-.-=-.-=-.-=-"
 
 def T_POLLING_MS(): return 100
 
+dbg_print = lambda f, *p: print(f"DBG> {f.__name__}:", *p) if f.dbg else ""
+wrn_print = lambda f, *p: print(f"WRN> {f.__name__}:", *p)
+err_print = lambda f, *p: print(f"ERR> {f.__name__}:", *p)
+
 ################################################################################
 
 ''' TO APPEND AFETR A FUNCTION
@@ -120,6 +124,8 @@ def fnc_dict_rst(func):
 from socket import getaddrinfo, AF_INET, AF_INET6
 
 def inet_get_ipaddr_info(weburl="ifconfig.me", ipv6=False):
+    self = inet_get_ipaddr_info
+
     weburl = weburl.split('/',1)
     dmname = weburl[0]
     url = ""
@@ -128,6 +134,8 @@ def inet_get_ipaddr_info(weburl="ifconfig.me", ipv6=False):
     restrn = try_dict_get(keydct)
     if restrn != None:
         return restrn
+
+    self.dbg = inet_get_ipaddr_info.dbg or get_ipaddr_info.dbg
 
     if ipv6:
         # Resolve to an IPv6 address only (family=AF_INET6)
@@ -146,8 +154,7 @@ def inet_get_ipaddr_info(weburl="ifconfig.me", ipv6=False):
     if len(weburl) > 1:
         url+= weburl[1]
 
-    if get_ipaddr_info.dbg:
-        print("inet_get_ipaddr_info:", weburl, url)
+    dbg_print(self, f"web = {weburl}, url = {url}")
 
     # Send the GET request with the Host header set to the original domain
     try:
@@ -156,7 +163,7 @@ def inet_get_ipaddr_info(weburl="ifconfig.me", ipv6=False):
         raise(e)
 
     if res.status_code != 200:
-        print("WRN> inet_get_ipaddr_info() return code:", res.status_code)
+        wrn_print(self, "return code =", res.status_code)
 
     # RAF: return code 206 is partial content and should be discarded
     if res.status_code == 206:
@@ -175,6 +182,7 @@ inet_get_ipaddr_info.dict = dict()
 #
 inet_get_ipaddr_info.delay = 600 # value in seconds
 inet_get_ipaddr_info.reset = inet_get_ipaddr_info.delay
+inet_get_ipaddr_info.dbg = 0
 
 
 def ipv4_get_ipaddr_info(url="ifconfig.me"):
@@ -423,23 +431,19 @@ def get_ipaddr_info(force=False):
     self = get_ipaddr_info
 
     inrun_wait_or_set()
+    
+    self.dbg = inet_get_ipaddr_info.dbg or get_ipaddr_info.dbg
+
+    dbg_print(self, f"{self.tries} -", self.text.replace("\n", " "), "-",
+        str(int((monotonic()-self.start)*1000))+" ms" if self.start else "")
+    if self.dbg: self.start = monotonic()
 
     if force or self.text == "":
         self.tries = 0
     elif self.city.find("(") < 0:
         pass
     elif self.ipv4 or self.ipv6:
-        if self.dbg:
-            print(f"{self.__name__}(last):", self.text.replace("\n", " "),
-                str(int((monotonic()-self.start) * 1000)) + " ms"
-                    if self.start else "")
-        self.start = monotonic()
         return inrun_reset(self.text)
-
-    if self.dbg:
-        self.start = monotonic()
-        print(f"{self.__name__}(try, ipaddr):", self.tries,
-            self.text.replace("\n", " "))
 
     self.tries += 1
     url4 = self.wurl4[0]
@@ -457,31 +461,27 @@ def get_ipaddr_info(force=False):
         self.ipv4 = ipv4
     except Exception as e:
         if 1 or self.dbg:
-            print(f"ERR> ipv4_get_ipaddr_info({url4}) failed({self.tries}) -",
-                str(e))
+            err_print(self, f"ipv4, {self.tries}, {url4} - ", str(e))
         self.ipv4 = ""
     try:
         ipv6 = ipv6_get_ipaddr_info(url6)
         self.ipv6 = ipv6
     except Exception as e:
         if 1 or self.dbg:
-            print(f"ERR> ipv6_get_ipaddr_info({url6}) failed({self.tries}) -",
-                str(e))
+            err_print(self, f"ipv6, {self.tries}, {url6} - ", str(e))
         self.ipv6 = ""
 
     if not ipv4 and not ipv6:
         if self.dbg:
-            print("ipaddr quest failed, but still trying")
+            wrn_print(self, "ipaddr quest failed, but still trying")
         return inrun_reset(ipaddr_searching + ipaddr_errstring)
 
     self.city = get_country_city(ipv4 if ipv4 else ipv6)
     self.text = ipv4 + (" - " if ipv4 else "") + self.city \
             + "\n" + (ipv6 if ipv6 else "-= ipv6 address missing =-")
 
-    if self.dbg:
-        print(f"{self.__name__}(try, ipstr):", self.tries,
-            self.text.replace("\n", " "),
-            int((monotonic()-self.start) * 1000), "ms")
+    dbg_print(self, f"{self.tries} -", self.text.replace("\n", " "), "-" +
+        str(int((monotonic()-self.start) * 1000)) + "ms" if self.start else "")
 
     ipaddr_info_update(1)
 
@@ -528,10 +528,8 @@ def get_country_city(ipaddr):
 
     strn = details.city + " (" + details.country + ")"
     rst_dict_set(ipaddr, strn)
-    
-    if get_ipaddr_info.dbg:
-        print("get_country_city.dict =", self.dict)
 
+    dbg_print(self, "dict =", self.dict)
     return strn
 
 get_country_city.city = ""
@@ -545,6 +543,7 @@ get_country_city.dict = dict()
 #
 get_country_city.delay = 600 # value in seconds
 get_country_city.reset = get_country_city.delay
+get_country_city.dbg = get_ipaddr_info.dbg
 
 
 def ipv6_system_check():
