@@ -1059,10 +1059,10 @@ stats_label_update.inrun = 0
 
 class UpdateThread(object):
 
-    def __init__(self, interval=1000):
+    def __init__(self, interval_ms=1000):
         self.skip = 0
         self.status = ""
-        self.interval = interval
+        self.interval_ms = interval_ms
         self._event = Event()
         thread = Thread(target=self.run)
         thread.daemon = True
@@ -1094,12 +1094,12 @@ class UpdateThread(object):
             stats_label.config(fg = "DimGray")
             status_icon_update(status, get_access.last)
 
-        if self.status != status:
+        if self.status != status and is_status_stable(status):
+            root.bell()
             self.status = status
-            if is_status_stable(status):
-                root.update_idletasks()
-                root.bell()
-        root.after(self.interval, self.task)
+            root.update_idletasks()
+
+        root.after(self.interval_ms, self.task)
 
     def run(self):
         console_infostart_prints()
