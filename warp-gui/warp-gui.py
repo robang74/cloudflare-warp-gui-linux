@@ -225,6 +225,8 @@ def inrun_reset(val=None):
 
 ##  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #
 
+is_status_stable = lambda x: (x == "UP" or x == "DN")
+
 def get_status(wait=0):
     inrun_wait_or_set(wait)
 
@@ -607,7 +609,7 @@ def service_taskbar():
 def wait_status():
     stats_label.config(text = "")
     status = get_status()
-    if status != "CN" and status != "DC":
+    if is_status_stable(status):
         return status
     root.after(T_POLLING_MS(), wait_status)
 
@@ -654,7 +656,7 @@ def update_guiview(status, errlog=1):
     on_button.update_idletasks()
     stats_label.update_idletasks()
 
-    if status != "CN" and status != "DC":
+    if is_status_stable(status):
         root.tr.pause()
         Thread(target=acc_info_update).start()
         Thread(target=change_ipaddr_text).start()
@@ -1094,7 +1096,7 @@ class UpdateThread(object):
 
         if self.status != status:
             self.status = status
-            if status in [ "UP", "DN" ]:
+            if is_status_stable(status):
                 root.update_idletasks()
                 root.bell()
         root.after(self.interval, self.task)
