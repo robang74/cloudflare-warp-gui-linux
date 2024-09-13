@@ -1080,6 +1080,7 @@ class UpdateThread(object):
     def task(self):
         while self.skip:
             sleep(T_POLLING())
+            root.after_idletasks()
 
         status = get_status()
         try:
