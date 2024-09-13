@@ -74,7 +74,7 @@ show_weather_xterm_cmdline = strn + ' >/dev/null 2>&1 & echo $!'
 ipaddr_errstring = "\n-= error or timeout =-"
 ipaddr_searching = "-=-.-=-.-=-.-=-"
 
-def T_POLLING_MS(): return 100
+def T_POLLING(): return 0.10
 
 dbg_print = lambda f, *p: print(f"DBG> {f.__name__}:", *p) if f.dbg else ""
 wrn_print = lambda f, *p: print(f"WRN> {f.__name__}:", *p)
@@ -208,13 +208,13 @@ func_name = lambda n=0: _getframe(n+1).f_code.co_name
 #
 ##  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #
 
-def inrun_wait_or_set(wait=0, func=None):
-    if not func:
-        func = eval(func_name(1))
-    if func.inrun and not wait > 0:
-        wait = T_POLLING_MS()
+def inrun_wait_or_set(wait=0):
+    func = eval(func_name(1))
     if wait > 0:
-        return root.after(wait, inrun_wait_or_set, 0, func)
+        sleep(wait)
+    else:
+        while func.inrun:
+            sleep(T_POLLING())
     func.inrun = 1
 
 
@@ -232,7 +232,7 @@ def get_status(wait=0):
 
     status = getoutput("warp-cli status")
     if status.find("Success") == 0:
-        return get_status(500)
+        return get_status(0.5)
     status = status.split("\n")[0]
     status_err = status.split(".")
     get_status.err = "\n".join(status_err)
@@ -608,10 +608,12 @@ def service_taskbar():
 
 def wait_status():
     stats_label.config(text = "")
-    status = get_status()
-    if is_status_stable(status):
-        return status
-    root.after(T_POLLING_MS(), wait_status)
+
+    while True:
+        status = get_status()
+        if is_status_stable(status):
+            return status
+        sleep(T_POLLING())
 
 
 def set_weather_button_state(state):
@@ -833,10 +835,9 @@ def show_weather_xterm():
             return True
 
     def wait_weather_xterm(pid):
-        if is_pid_running(pid):
-            root.after(T_POLLING_MS(), wait_weather_xterm, pid)
-        else:
-            set_weather_button_state(1)
+        while is_pid_running(pid):
+            sleep(T_POLLING())
+        set_weather_button_state(1)
 
     set_weather_button_state(0)
     city = get_country_city.city
@@ -1077,8 +1078,9 @@ class UpdateThread(object):
         self.skip = 0
 
     def task(self):
-        if self.skip:
-            return root.after(T_POLLING_MS(), self.task)
+        while self.skip:
+            sleep(T_POLLING())
+
         status = get_status()
         try:
             top = root.attributes('-topmost')
