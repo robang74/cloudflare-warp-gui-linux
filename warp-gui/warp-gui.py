@@ -665,7 +665,7 @@ def update_guiview(status, errlog=1):
         Thread(target=get_settings).start()
         slide_update(status)
         root.tr.resume()
-        sleep(0.10)
+        sleep(T_POLLING())
 
     update_guiview.inrun = 0
 
