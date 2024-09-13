@@ -1060,11 +1060,15 @@ stats_label_update.inrun = 0
 
 class UpdateThread(object):
 
-    def __init__(self, interval_ms=1000):
+    def __init__(self, time_ms=1000):
+        self.dbg = 1
+        self.antm = 0
         self.skip = 0
+        self.start = 0
         self.status = ""
-        self.interval_ms = interval_ms
         self._event = Event()
+        self.time_ms = time_ms
+        self.ltcy_ms = time_ms >> 4
         thread = Thread(target=self.run)
         thread.daemon = True
         thread.start()
@@ -1079,8 +1083,12 @@ class UpdateThread(object):
 
     def task(self):
         while self.skip:
+            self.start = 0
             sleep(T_POLLING())
             root.after_idletasks()
+
+        start = monotonic()
+        dltme = int((start - self.start) * 1000)
 
         status = get_status()
         try:
@@ -1102,7 +1110,19 @@ class UpdateThread(object):
             self.status = status
             root.update_idletasks()
 
-        root.after(self.interval_ms, self.task)
+        now = monotonic()
+        self.antm = int((now - start) * 1000)
+        if self.dbg:
+            if self.start:
+                print("TME> wrk: %4d ms, cyc: %4d ms, dly: %+5d ms" %
+                    (self.antm, dltme, dltme - self.time_ms + self.antm))
+            else:
+                print("TME> wrk: %4d ms, cyc: %4d ms, dly: %+5d ms" %
+                    (self.antm, 0, 0))
+        self.start = now
+        antm = self.antm if self.antm < self.ltcy_ms else self.ltcy_ms
+        root.after(self.time_ms - antm, self.task)
+
 
     def run(self):
         console_infostart_prints()
