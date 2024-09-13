@@ -1061,7 +1061,7 @@ stats_label_update.inrun = 0
 class UpdateThread(object):
 
     def __init__(self, time_ms=1000):
-        self.dbg = 1
+        self.dbg = 0
         self.antm = 0
         self.skip = 0
         self.start = 0
@@ -1073,12 +1073,18 @@ class UpdateThread(object):
         thread.daemon = True
         thread.start()
 
+    def freeze(self):
+        self.skip = 1
+        self._event.clear()     
+
+    def unfreeze(self):
+        self._event.set()
+        self.skip = 0   
+
     def pause(self):
         self.skip = 1
-        self._event.clear()
 
     def resume(self):
-        self._event.set()
         self.skip = 0
 
     def task(self):
@@ -1122,7 +1128,6 @@ class UpdateThread(object):
         self.start = now
         antm = self.antm if self.antm < self.ltcy_ms else self.ltcy_ms
         root.after(self.time_ms - antm, self.task)
-
 
     def run(self):
         console_infostart_prints()
