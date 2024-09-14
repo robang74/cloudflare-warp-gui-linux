@@ -825,6 +825,7 @@ def kill_weather_xterm(sig=15):
 
 
 def show_weather_xterm():
+    global show_weather_xterm_cmdline
 
     def is_pid_running(pid):
         try:
@@ -844,20 +845,25 @@ def show_weather_xterm():
     if not city:
         return
 
+    self = show_weather_xterm
     city = city.replace(" ", "+")
-    cmdl = show_weather_xterm_cmdline.replace("${city}", city)
-    cmdl = cmdl.replace("${SHELL}", shellbin)
-    retstrn = getoutput(cmdl)
+    if not self.cmdline:
+        cmdl = show_weather_xterm_cmdline
+        cmdl = cmdl.replace("${city}", city)
+        cmdl = cmdl.replace("${SHELL}", shellbin)
+        self.cmdline = cmdl
+    retstrn = getoutput(self.cmdline)
     pid = int(retstrn)
     if pid > 0:
-        show_weather_xterm.pid = pid
-        print("show_weather_xterm:", city, show_weather_xterm.pid)
+        self.pid = pid
+        print(f"{self.__name__}:", city, self.pid)
         Thread(target=wait_weather_xterm, args=(pid,)).start()
     else:
-        show_weather_xterm.pid = -1
-        print("WRN> show_weather_xterm failed:", retstrn)
+        self.pid = -1
+        wrn_print(self, "failed with error - ", retstrn)
 
 show_weather_xterm.pid = -1
+show_weather_xterm.cmdline = ""
 
 # create root windows ##########################################################
 
