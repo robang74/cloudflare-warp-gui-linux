@@ -45,6 +45,8 @@
 ################################################################################
 # To check the WARP connection: curl https://www.cloudflare.com/cdn-cgi/trace/
 
+import signal
+import atexit
 from tkinter import *
 from time import sleep
 from os import getpid, path, kill, environ
@@ -1225,9 +1227,6 @@ def set_settings(warp, dnsf):
     set_mode(warp_modes[warp])
 
 ################################################################################
-
-import signal
-import atexit
 
 def handle_exit(*args):
     try:
