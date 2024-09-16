@@ -845,9 +845,12 @@ def show_weather_xterm():
             return True
 
     def wait_weather_xterm(pid):
-        while is_pid_running(pid):
-            sleep(T_POLLING())
-        set_weather_button_state(1)
+        try:
+            while is_pid_running(pid):
+                sleep(T_POLLING())
+            set_weather_button_state(1)
+        except:
+            return
 
     set_weather_button_state(0)
     city = get_country_city.city
