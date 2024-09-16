@@ -724,7 +724,6 @@ slide_switch.inrun = 0
 def kill_all_instances(filename=filename):
     global show_weather_xterm_title
 
-    kill_weather_xterm()
     if not filename:
         handle_exit()
 
