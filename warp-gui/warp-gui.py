@@ -822,12 +822,13 @@ def topmost_toggle():
     menubar.entryconfigure(5, label=f"{uc_top} TOP")
 
 
-def kill_weather_xterm(sig=15):
+def kill_weather_xterm(sig=signal.SIGTERM):
     pid = show_weather_xterm.pid
     if not pid > 0:
         return
     try:
         kill(pid, sig)
+        kill(pid, signal.SIGINT)
     except:
         pass
 
