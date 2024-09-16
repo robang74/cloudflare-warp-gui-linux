@@ -404,8 +404,7 @@ def ipaddr_info_update(enable=0):
     else:
         inrun_wait_or_set()
         menubar.entryconfigure(3, state = DISABLED)
-        ipaddr_info_update.tr = Thread(target=force_get_ipaddr_info)
-        ipaddr_info_update.tr.start()
+        root.tr.daemon_start(target=force_get_ipaddr_info)
 
 ipaddr_info_update.tr = None
 ipaddr_info_update.inrun = 0
@@ -650,9 +649,9 @@ def update_guiview(status, errlog=1):
 
     if is_status_stable(status):
         root.tr.pause()
-        Thread(target=acc_info_update).start()
-        Thread(target=change_ipaddr_text).start()
-        Thread(target=get_settings).start()
+        root.tr.daemon_start(target=acc_info_update)
+        root.tr.daemon_start(target=change_ipaddr_text)
+        root.tr.daemon_start(target=get_settings)
         slide_update(status)
         root.tr.resume()
         sleep(T_POLLING())
@@ -855,7 +854,7 @@ def show_weather_xterm():
     if pid > 0:
         self.pid = pid
         print(f"{self.__name__}:", city, self.pid)
-        Thread(target=wait_weather_xterm, args=(pid,)).start()
+        root.tr.daemon_start(target=wait_weather_xterm, args=(pid,))
     else:
         self.pid = -1
         wrn_print(self, "failed with error - ", retstrn)
@@ -1068,9 +1067,13 @@ class UpdateThread(object):
         self._event = Event()
         self.time_ms = time_ms
         self.ltcy_ms = time_ms >> 4
-        thread = Thread(target=self.run)
-        thread.daemon = True
-        thread.start()
+        self.daemon_start(target=self.run)
+
+    def daemon_start(self, *args, **kwargs):
+        th = Thread(*args, **kwargs)
+        th.daemon = True
+        th.start()
+        return th
 
     def pause(self):
         self.skip = 1
