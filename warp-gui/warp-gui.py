@@ -280,7 +280,6 @@ def update_guiview_by_menu(info_str, err_str=""):
     stats_label.config(text = err_str, fg = "OrangeRed")
 
     root.tr.resume()
-    stats_label.update_idletasks()
     update_guiview(get_status(), 0)
 
 
@@ -360,7 +359,6 @@ def acc_info_update():
         acc_label.config(text = "Zero Trust", fg = "Blue")
     else:
         acc_label.config(text = "WARP", fg = "Tomato")
-    acc_label.update_idletasks()
 
     if get_status.reg == False:
         slogan.config(image = cflogo)
@@ -368,7 +366,6 @@ def acc_info_update():
         slogan.config(image = cflogo)
     else:
         slogan.config(image = tmlogo)
-    slogan.update_idletasks()
 
     status_icon_update(status, zerotrust)
 
@@ -384,7 +381,6 @@ def status_icon_update(status=get_status.last, zerotrust=get_access.last):
             root.iconphoto(False,appicon_warp)
         else:
             root.iconphoto(False,appicon_pass)
-    root.update_idletasks()
 
 
 def cf_info():
@@ -403,14 +399,11 @@ def ipaddr_info_update(enable=0):
                 ipaddr_info_update.tr.join()
         except:
             pass
-        root.update_idletasks()
         menubar.entryconfigure(3, state = NORMAL)
-        menubar.update_idletasks()
         inrun_reset()
     else:
         inrun_wait_or_set()
         menubar.entryconfigure(3, state = DISABLED)
-        menubar.update_idletasks()
         ipaddr_info_update.tr = Thread(target=force_get_ipaddr_info)
         ipaddr_info_update.tr.start()
 
@@ -624,7 +617,6 @@ def set_weather_button_state(state):
     elif state:
         show_weather_xterm.pid = -1
     menubar.entryconfigure(7, state=(NORMAL if state else DISABLED))
-    menubar.update_idletasks()
 
 
 def change_ipaddr_text():
@@ -633,7 +625,6 @@ def change_ipaddr_text():
         ipaddr_text_set(text)
         set_weather_button_state("update")
         on_button.config(state = NORMAL)
-        on_button.update_idletasks()
 
 
 def auto_update_guiview(errlog=1):
@@ -656,9 +647,6 @@ def update_guiview(status, errlog=1):
         on_button.config(image = off)
         if errlog and stats_err == 0:
             stats_label.config(fg = "DimGray")
-
-    on_button.update_idletasks()
-    stats_label.update_idletasks()
 
     if is_status_stable(status):
         root.tr.pause()
@@ -700,7 +688,6 @@ def slide_switch():
     root.tr.pause()
 
     on_button.config(state = DISABLED)
-    on_button.update_idletasks()
 
     if get_status.last == "UP":
         get_status.last = "DC"
@@ -712,7 +699,6 @@ def slide_switch():
         status_label.config(text = "Connecting...", fg = "Dimgray",
             font = ("Arial", 15, 'italic') )
         retstr = getoutput("warp-cli --accept-tos connect")
-    status_label.update_idletasks()
 
     root.tr.resume()
     auto_update_guiview()
@@ -1049,10 +1035,6 @@ def slide_update(status):
     else:
         change = 0
 
-    if change:
-        on_button.update_idletasks()
-        status_label.update_idletasks()
-
 
 def stats_label_update():
     if stats_label_update.inrun:
@@ -1068,7 +1050,6 @@ def stats_label_update():
         wsl = wsl.splitlines()
         wsl = wsl[0] + "\n" + "\n".join(map(str, wsl[2:]))
         stats_label.config(text = wsl, fg = "MidNightBlue")
-        stats_label.update_idletasks()
 
     stats_label_update.inrun = 0
 
@@ -1091,19 +1072,21 @@ class UpdateThread(object):
         thread.daemon = True
         thread.start()
 
-    def freeze(self):
-        self.skip = 1
-        self._event.clear()     
-
-    def unfreeze(self):
-        self._event.set()
-        self.skip = 0   
-
     def pause(self):
         self.skip = 1
+        root.update_idletasks()
 
     def resume(self):
+        root.update_idletasks()
         self.skip = 0
+
+    def freeze(self):
+        pause(self)
+        root._event.clear()
+
+    def unfreeze(self):
+        root._event.set()
+        resume(self)
 
     def task(self):
         while self.skip:
@@ -1130,9 +1113,8 @@ class UpdateThread(object):
             status_icon_update(status, get_access.last)
 
         if self.status != status and is_status_stable(status):
-            root.bell()
             self.status = status
-            root.update_idletasks()
+            root.bell()
 
         now = monotonic()
         self.antm = int((now - start) * 1000)
@@ -1216,7 +1198,6 @@ def get_settings():
     warp_str = warp_modes[get_settings.warp_mode].split("_")[0]
     dnsf_str = dnsf_types[get_settings.warp_dnsf]
     lbl_setting.config(text = "mode:" + warp_str +  "\ndnsf:" + dnsf_str)
-    lbl_setting.update_idletasks()
 
 get_settings.warp_mode = 0
 get_settings.warp_dnsf = 0
