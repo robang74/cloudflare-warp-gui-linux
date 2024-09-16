@@ -1353,5 +1353,6 @@ root.tr = UpdateThread()
 root.update_idletasks()
 root.mainloop()
 kill_weather_xterm()
-root.destroy()
+try: root.destroy()
+except: pass
 
