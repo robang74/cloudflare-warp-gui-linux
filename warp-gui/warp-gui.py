@@ -1229,10 +1229,6 @@ def set_settings(warp, dnsf):
 ################################################################################
 
 def handle_exit(*args):
-    try:
-        kill_weather_xterm()
-    except:
-        pass
     root.quit()
 
 atexit.register(handle_exit)
@@ -1346,4 +1342,6 @@ root.config(menu=menubar)
 root.tr = UpdateThread()
 root.update_idletasks()
 root.mainloop()
+kill_weather_xterm()
+root.destroy()
 
