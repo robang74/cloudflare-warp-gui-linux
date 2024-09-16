@@ -830,7 +830,6 @@ def kill_weather_xterm(sig=15):
         kill(pid, sig)
     except:
         pass
-    set_weather_button_state(1)
 
 
 def show_weather_xterm():
