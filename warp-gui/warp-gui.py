@@ -734,15 +734,23 @@ def kill_all_instances(filename=filename):
     ereg = '"s/\([ 0-9]*\) .*title ' + show_weather_xterm_title + ' .*/\\\\1/p"'
     cmdx = 'pgrep -u $USER -alf xterm | sed -ne ' + ereg
 
+    self = kill_all_instances
     ret_str = ""
     try:
         ret_str = getoutput(f"for i in $({cmdx}); do kill $i; kill -1 $i; done")
+    except Exception as e:
+        err_print(self, "xterm - ", str(e), "\n\n")
+    else:
+        pass
+    try:
         ret_str+= getoutput(f"for i in $({cmda}); do kill $i; kill -1 $i; done")
     except Exception as e:
-        print(f"ERR> kill_all_instances(): {ret_str}\n\n", str(e))
+        err_print(self, "guiapp - ", str(e), "\n\n")
     else:
-        if not ret_str: ret_str = "(OK)"
-        print(f"kill_all_instances:\n  {cmdx}\n  {cmda}\nreturns: {ret_str}\n")
+        pass
+    if not ret_str: ret_str = "(OK)"
+    print(f"kill_all_instances:\n  {cmdx}\n  {cmda}\nreturns: {ret_str}\n")
+
     handle_exit()
 
 
