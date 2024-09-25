@@ -393,6 +393,12 @@ def cf_info():
 
 
 def ipaddr_info_update(enable=0):
+
+    def force_get_ipaddr_info():
+        ipaddr_text_set()
+        text = get_ipaddr_info(True)
+        change_ipaddr_text(text)
+
     if get_ipaddr_info.dbg:
         print("ipaddr_info_update: ", enable)
 
@@ -413,11 +419,6 @@ def ipaddr_info_update(enable=0):
 
 ipaddr_info_update.tr = None
 ipaddr_info_update.inrun = 0
-
-
-def force_get_ipaddr_info():
-    ipaddr_text_set()
-    get_ipaddr_info(True)
 
 ################################################################################
 
