@@ -287,9 +287,10 @@ def common_reset_by_menu(refresh=False):
     if not refresh:
         if get_status.last != "DN":
             slide_update("DC")
+        get_status.last = "RGM"
         get_access.last = ""
-        access_icon_update()
         status_icon_update()
+        access_icon_update()
     ipaddr_text_set()
 
 
@@ -311,7 +312,6 @@ def information_refresh():
     fnc_dict_rst(inet_get_ipaddr_info)
     fnc_dict_rst(get_country_city)
     update_guiview_by_menu("information refresh")
-    access_icon_update()
 
 
 def session_renew():
