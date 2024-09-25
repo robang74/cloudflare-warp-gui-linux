@@ -623,8 +623,9 @@ def set_weather_button_state(state):
     menubar.entryconfigure(7, state=(NORMAL if state else DISABLED))
 
 
-def change_ipaddr_text():
-    text = get_ipaddr_info()
+def change_ipaddr_text(text=""):
+    if not text:
+        text = get_ipaddr_info()
     if text != ipaddr_label.cget("text"):
         ipaddr_text_set(text)
         set_weather_button_state("update")
