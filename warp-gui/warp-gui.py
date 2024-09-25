@@ -672,17 +672,11 @@ update_guiview.status_old = 1
 
 
 def ipaddr_text_set(ipaddr_text=ipaddr_searching):
-    fgcolor = "DimGray"
-    if ipaddr_text[0] == '\n':
-        pass
     if ipaddr_text == ipaddr_searching:
         ipaddr_text = "\n" + ipaddr_searching
         set_weather_button_state(0)
         get_country_city.city = ""
-    if get_status.last != "UP":
-        pass
-    else:
-        fgcolor = "MidNightBlue"
+    fgcolor = "MidNightBlue" if get_status.last == "UP" else "DimGray"
     ipaddr_label.config(fg = fgcolor)
     ipaddr_label.config(text = ipaddr_text)
     ipaddr_label.update_idletasks()
