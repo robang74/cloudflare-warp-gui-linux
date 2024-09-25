@@ -648,19 +648,22 @@ def update_guiview(status, errlog=1):
         if errlog and stats_err == 0:
             stats_label.config(fg = "DimGray")
 
-    slide_update(status)
+    if status != update_guiview.status_old:
+        update_guiview.status_old = status
+        slide_update(status)
 
-    if is_status_stable(status):
-        root.tr.pause()
-        root.tr.daemon_start(target=acc_info_update)
-        root.tr.daemon_start(target=change_ipaddr_text)
-        root.tr.daemon_start(target=get_settings)
-        root.tr.resume()
-        sleep(T_POLLING())
+        if is_status_stable(status):
+            root.tr.pause()
+            root.tr.daemon_start(target=acc_info_update)
+            root.tr.daemon_start(target=change_ipaddr_text)
+            root.tr.daemon_start(target=get_settings)
+            root.tr.resume()
+            sleep(T_POLLING())
 
     update_guiview.inrun = 0
 
 update_guiview.inrun = 0
+update_guiview.status_old = 1
 
 
 def ipaddr_text_set(ipaddr_text=ipaddr_searching):
