@@ -281,15 +281,15 @@ def update_guiview_by_menu(info_str, err_str=""):
     update_guiview(get_status(), 0, 1)
 
 
-def common_reset_by_menu():
+def common_reset_by_menu(refresh=False):
     root.tr.pause()
     stats_label.config(text = "")
-    if get_status.last != "DN":
-        slide_update("DC")
-    get_status.last = "RGM"
-    get_access.last = ""
-    access_icon_update()
-    status_icon_update()
+    if not refresh:
+        if get_status.last != "DN":
+            slide_update("DC")
+        get_access.last = ""
+        access_icon_update()
+        status_icon_update()
     ipaddr_text_set()
 
 
@@ -307,7 +307,7 @@ def registration_delete():
 
 def information_refresh():
     kill_weather_xterm()
-    common_reset_by_menu()
+    common_reset_by_menu(True)
     fnc_dict_rst(inet_get_ipaddr_info)
     fnc_dict_rst(get_country_city)
     update_guiview_by_menu("information refresh")
