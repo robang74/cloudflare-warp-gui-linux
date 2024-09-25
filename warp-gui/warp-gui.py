@@ -229,6 +229,8 @@ def inrun_reset(val=None):
 
 is_status_stable = lambda x: (x == "UP" or x == "DN")
 
+is_access_regist = lambda: False if get_status.last in ["", "RGM", "ERR"] else True
+
 def get_status(wait=0):
     inrun_wait_or_set(wait)
 
@@ -240,16 +242,12 @@ def get_status(wait=0):
     get_status.err = "\n".join(status_err)
 
     if status.find("Disconnected") > -1:
-        get_status.reg = True
         status = "DN"
     elif status.find("Connected") > -1:
-        get_status.reg = True
         status = "UP"
     elif status.find("Connecting") > -1:
-        get_status.reg = True
         status = "CN"
     elif status.find("Registration Missing") > -1:
-        get_status.reg = False
         status = "RGM"
     else:
         status = "ERR"
@@ -260,9 +258,8 @@ def get_status(wait=0):
 
     return inrun_reset(status)
 
-get_status.last = ""
 get_status.err = ""
-get_status.reg = True
+get_status.last = ""
 get_status.inrun = 0
 
 
@@ -361,7 +358,7 @@ def acc_info_update():
     else:
         acc_label.config(text = "WARP", fg = "Tomato")
 
-    if get_status.reg == False:
+    if not is_access_regist():
         slogan.config(image = cflogo)
     elif zerotrust == True:
         slogan.config(image = cflogo)
@@ -562,7 +559,7 @@ def enroll():
 
     getoutput("warp-cli disconnect")
     try:
-        if get_access.last == True or get_status.reg == False:
+        if get_access.last or not is_access_regist():
             cmdline = registration_new_cmdline
             getoutput(cmdline)
             slogan.config(image = cflogo)
@@ -1163,7 +1160,7 @@ lbl_gui_ver = Label(frame, text = gui_version_str, fg = "DimGray", bg = bgcolor,
 lbl_gui_ver.place(relx=0.0, rely=0.67, anchor='sw')
 
 slogan = Button(frame, image = "", command=enroll)
-if get_status.reg == False:
+if not is_access_regist():
     slogan.config(image = cflogo)
 elif get_access.last == True:
     slogan.config(image = cflogo)
