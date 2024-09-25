@@ -648,12 +648,13 @@ def update_guiview(status, errlog=1):
         if errlog and stats_err == 0:
             stats_label.config(fg = "DimGray")
 
+    slide_update(status)
+
     if is_status_stable(status):
         root.tr.pause()
         root.tr.daemon_start(target=acc_info_update)
         root.tr.daemon_start(target=change_ipaddr_text)
         root.tr.daemon_start(target=get_settings)
-        slide_update(status)
         root.tr.resume()
         sleep(T_POLLING())
 
