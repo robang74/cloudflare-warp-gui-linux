@@ -1095,7 +1095,7 @@ class UpdateThread(object):
         while self.skip:
             self.start = 0
             sleep(T_POLLING())
-            root.after_idletasks()
+            root.update_idletasks()
 
         start = monotonic()
         dltme = int((start - self.start) * 1000)
