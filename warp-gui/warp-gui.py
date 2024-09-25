@@ -1122,9 +1122,9 @@ class UpdateThread(object):
             update_guiview(status, 0)
         else:
             stats_label.config(fg = "DimGray")
-            status_icon_update(status, get_access.last)
 
         if self.status != status and is_status_stable(status):
+            status_icon_update(status, get_access.last)
             self.status = status
             root.bell()
 
