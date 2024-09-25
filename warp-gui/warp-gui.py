@@ -278,7 +278,7 @@ def update_guiview_by_menu(info_str, err_str=""):
     stats_label.config(text = err_str, fg = "OrangeRed")
 
     root.tr.resume()
-    update_guiview(get_status(), 0)
+    update_guiview(get_status(), 0, 1)
 
 
 def common_reset_by_menu():
@@ -632,7 +632,7 @@ def change_ipaddr_text():
 
 
 def auto_update_guiview(errlog=1):
-    update_guiview(wait_status(), errlog)
+    update_guiview(wait_status(), errlog, 1)
 
 
 def update_guiview(status, errlog=1, force=0):
