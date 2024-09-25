@@ -348,6 +348,13 @@ def get_access():
 get_access.last = ""
 get_access.inrun = 0
 
+def access_icon_update(status=get_status.last, zerotrust=get_access.last):
+    if not is_access_regist():
+        slogan.config(image = cflogo)
+    elif zerotrust:
+        slogan.config(image = cflogo)
+    else:
+        slogan.config(image = tmlogo)
 
 def acc_info_update():
     status = get_status.last
@@ -358,13 +365,7 @@ def acc_info_update():
     else:
         acc_label.config(text = "WARP", fg = "Tomato")
 
-    if not is_access_regist():
-        slogan.config(image = cflogo)
-    elif zerotrust == True:
-        slogan.config(image = cflogo)
-    else:
-        slogan.config(image = tmlogo)
-
+    access_icon_update(status, zerotrust)
     status_icon_update(status, zerotrust)
 
 
@@ -1160,13 +1161,8 @@ lbl_gui_ver = Label(frame, text = gui_version_str, fg = "DimGray", bg = bgcolor,
 lbl_gui_ver.place(relx=0.0, rely=0.67, anchor='sw')
 
 slogan = Button(frame, image = "", command=enroll)
-if not is_access_regist():
-    slogan.config(image = cflogo)
-elif get_access.last == True:
-    slogan.config(image = cflogo)
-else:
-    slogan.config(image = tmlogo)
 slogan.pack(side=BOTTOM, pady=10, padx=(10,10))
+access_icon_update()
 
 lbl_setting = Label(frame, text = "mode: - - - -\ndnsf: - - - -", fg = "Black",
     bg = bgcolor, font =  ("Courier", 10), pady=10, padx=10, justify=LEFT)
