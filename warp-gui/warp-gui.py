@@ -1227,6 +1227,13 @@ def set_settings(warp, dnsf):
 
 def handle_exit(*args):
     root.quit()
+    sleep(5*T_POLLING())
+# # # # # # # # # # # # # # # # # #
+    kill(getpid(), signal.SIGHUP) #
+# RAF: ** WARNING ** # # # # # # #
+#
+# put 0 instead of getpid() and the x-session will be killed, as well
+# this it happens only when the desktop link is used to start the app
 
 atexit.register(handle_exit)
 signal.signal(signal.SIGTERM, handle_exit)
