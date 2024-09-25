@@ -632,9 +632,10 @@ def auto_update_guiview(errlog=1):
 
 
 def update_guiview(status, errlog=1):
-    if update_guiview.inrun:
+    self = update_guiview
+    if self.inrun:
         return
-    update_guiview.inrun = 1
+    self.inrun = 1
 
     stats_err = 0
     if errlog and get_status.err != "":
@@ -648,8 +649,8 @@ def update_guiview(status, errlog=1):
         if errlog and stats_err == 0:
             stats_label.config(fg = "DimGray")
 
-    if status != update_guiview.status_old:
-        update_guiview.status_old = status
+    if status != self.status_old:
+        self.status_old = status
         slide_update(status)
 
         if is_status_stable(status):
@@ -660,7 +661,7 @@ def update_guiview(status, errlog=1):
             root.tr.resume()
             sleep(T_POLLING())
 
-    update_guiview.inrun = 0
+    self.inrun = 0
 
 update_guiview.inrun = 0
 update_guiview.status_old = 1
