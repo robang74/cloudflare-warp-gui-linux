@@ -635,7 +635,7 @@ def auto_update_guiview(errlog=1):
     update_guiview(wait_status(), errlog)
 
 
-def update_guiview(status, errlog=1):
+def update_guiview(status, errlog=1, force=0):
     self = update_guiview
     if self.inrun:
         return
@@ -646,15 +646,15 @@ def update_guiview(status, errlog=1):
         stats_label.config(text = get_status.err, fg = "OrangeRed")
         stats_err = 1
 
-    if status == "UP":
-        on_button.config(image = on)
-    elif status != "CN":
-        on_button.config(image = off)
-        if errlog and stats_err == 0:
-            stats_label.config(fg = "DimGray")
-
-    if status != self.status_old:
+    if status != self.status_old or force:
         self.status_old = status
+
+        if status == "UP":
+            on_button.config(image = on)
+        elif status != "CN":
+            on_button.config(image = off)
+            if errlog and stats_err == 0:
+                stats_label.config(fg = "DimGray")
         slide_update(status)
 
         if is_status_stable(status):
