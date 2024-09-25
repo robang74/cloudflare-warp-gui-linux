@@ -693,9 +693,8 @@ def slide_switch():
         return
     slide_switch.inrun = 1
 
-    ipaddr_text_set()
     root.tr.pause()
-
+    ipaddr_text_set()
     on_button.config(state = DISABLED)
 
     if get_status.last == "UP":
