@@ -262,6 +262,7 @@ get_status.err = ""
 get_status.last = ""
 get_status.inrun = 0
 
+################################################################################
 
 def update_guiview_by_menu(info_str, err_str=""):
     if err_str != "":
@@ -280,52 +281,55 @@ def update_guiview_by_menu(info_str, err_str=""):
     update_guiview(get_status(), 0)
 
 
-def settings_reset():
-    if get_status.last == "UP":
-        slide_switch()
-    ipaddr_text_set()
+def common_reset_by_menu():
     root.tr.pause()
+    stats_label.config(text = "")
+    if get_status.last != "DN":
+        slide_update("DC")
     get_status.last = "RGM"
+    get_access.last = ""
+    access_icon_update()
+    status_icon_update()
+    ipaddr_text_set()
+
+
+def settings_reset():
+    common_reset_by_menu()
     err_str = getoutput("warp-cli settings reset")
     update_guiview_by_menu("settings reset", err_str)
 
 
 def registration_delete():
-    ipaddr_text_set()
-    root.tr.pause()
-    get_status.last = "RGM"
+    common_reset_by_menu()
     err_str = getoutput("warp-cli registration delete")
     update_guiview_by_menu("registration delete", err_str)
 
 
 def information_refresh():
     kill_weather_xterm()
-    ipaddr_text_set()
-    root.tr.pause()
-    get_status.last = ""
+    common_reset_by_menu()
     fnc_dict_rst(inet_get_ipaddr_info)
     fnc_dict_rst(get_country_city)
     update_guiview_by_menu("information refresh")
+    access_icon_update()
 
 
 def session_renew():
     global registration_new_cmdline
 
-    ipaddr_text_set()
-    root.tr.pause()
+    warp_mode_old = get_settings.warp_mode
+    warp_dnsf_old = get_settings.warp_dnsf
+    oldval = get_status.last
+    common_reset_by_menu()
 
     if get_settings.warp_mode == 0 or get_settings.warp_dnsf == 0:
         get_settings()
     if get_status.last == "":
         get_status()
 
-    oldval = get_status.last
-    warp_mode_old = get_settings.warp_mode
-    warp_dnsf_old = get_settings.warp_dnsf
     cmdline = registration_new_cmdline
     if oldval == "UP":
         cmdline += " && warp-cli connect"
-        slide_update("DC")
 
     err_str = getoutput("warp-cli registration delete; " + cmdline)
     if oldval == "UP":
@@ -335,7 +339,9 @@ def session_renew():
 
     set_settings(warp_mode_old, warp_dnsf_old)
     update_guiview_by_menu("WARP session renew", err_str)
+    access_icon_update()
 
+################################################################################
 
 def get_access():
     inrun_wait_or_set()
