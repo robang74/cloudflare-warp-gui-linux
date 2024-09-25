@@ -376,7 +376,7 @@ def acc_info_update():
 
 
 def status_icon_update(status=get_status.last, zerotrust=get_access.last):
-    if zerotrust == True:
+    if zerotrust:
         if status == "UP":
             root.iconphoto(False,appicon_team)
         else:
@@ -1115,7 +1115,7 @@ class UpdateThread(object):
         except:
             top = 1
 
-        if top == 1:
+        if top:
             if status == "UP":
                 stats_label_update()
             update_guiview(status, 0)
