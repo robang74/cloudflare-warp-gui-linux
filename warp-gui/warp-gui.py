@@ -328,6 +328,7 @@ def session_renew():
     cmdline = registration_new_cmdline
     if oldval == "UP":
         cmdline += " && warp-cli connect"
+        slide_update("DC")
 
     err_str = getoutput("warp-cli registration delete; " + cmdline)
     if oldval == "UP":
