@@ -1010,29 +1010,32 @@ stats_label.pack(padx=10, pady=(10,10))
 ################################################################################
 
 def slide_update(status):
-    change = 1
+    if status == slide_update.status_old:
+        return
+    slide_update.status_old = status
+    slide = off
 
     if status == "UP":
         status_label.config(text = "Connected", fg = "Blue",
             font = ("Arial", 15, 'bold') )
-        on_button.config(image = on)
+        slide = on
     elif status == "DN":
         status_label.config(text = "Disconnected", fg = "DimGray",
             font = ("Arial", 15, '') )
-        on_button.config(image = off)
         stats_label.config(fg = "DimGray")
     elif status == "RGM":
         status_label.config(text = "No registration", fg = "DimGray",
             font = ("Arial", 15, '') )
-        on_button.config(image = off)
     elif status == "CN":
         status_label.config(text = "Connecting...", fg = "DimGray",
             font = ("Arial", 15, 'italic') )
     elif status == "DC":
         status_label.config(text = "Disconnecting...", fg = "DimGray",
             font = ("Arial", 15, 'italic') )
-    else:
-        change = 0
+
+    on_button.config(image = slide)
+
+slide_update.status_old = ""
 
 
 def stats_label_update():
