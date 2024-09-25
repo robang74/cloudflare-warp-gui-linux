@@ -712,7 +712,7 @@ def kill_all_instances(filename=filename):
     if not filename:
         handle_exit()
 
-    ereg = '"s/\([0-9]*\) python.*[ /]' + filename + '$/\\\\1/p"'
+    ereg = '"s/\([0-9]*\) .*python.*[ /]' + filename + '$/\\\\1/p"'
     cmda = 'pgrep -u $USER -alf ' + filename + ' | sed -ne ' \
           + ereg + " | grep -v $PPID"
 
