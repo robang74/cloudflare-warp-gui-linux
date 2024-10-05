@@ -240,8 +240,10 @@ def get_status(wait=0):
     inrun_wait_or_set(wait)
 
     status = getoutput("warp-cli status")
-    if status.find("Success") == 0:
+    _dbg_print("(b)", status.replace("\n", " "))
+    if not status.find("Success"):
         return get_status(0.5)
+
     status = status.split("\n")[0]
     status_err = status.split(".")
     get_status.err = "\n".join(status_err)
@@ -261,11 +263,13 @@ def get_status(wait=0):
         get_ipaddr_info.text = ""
         get_status.last = status
 
+    _dbg_print("(e)", status, status_err)
     return inrun_reset(status)
 
 get_status.err = ""
 get_status.last = ""
 get_status.inrun = 0
+get_status.dbg = 0
 
 ################################################################################
 
