@@ -78,9 +78,20 @@ ipaddr_searching = "-=-.-=-.-=-.-=-"
 
 def T_POLLING(): return 0.10
 
-dbg_print = lambda f, *p: print(f"DBG> {f.__name__}:", *p) if f.dbg else ""
-wrn_print = lambda f, *p: print(f"WRN> {f.__name__}:", *p)
-err_print = lambda f, *p: print(f"ERR> {f.__name__}:", *p)
+from sys import _getframe
+# for current func name, specify 0 or no argument.
+# for name of caller of current func, specify 1.
+# for name of caller of caller of current func, specify 2. etc.
+func_name = lambda n=0: _getframe(n+1).f_code.co_name
+
+_dbg_print = lambda *p: _chk_print("DBG", *p)
+_wrn_print = lambda *p: _chk_print("WRN", *p)
+_err_print = lambda *p: _chk_print("ERR", *p)
+
+def _chk_print(sn, *p):
+    fn=func_name(2)
+    if sn != "DBG" or eval(fn+'.dbg'):
+        print(f"{sn}> {fn}:", *p)
 
 ################################################################################
 
@@ -156,7 +167,7 @@ def inet_get_ipaddr_info(weburl="ifconfig.me", ipv6=False):
     if len(weburl) > 1:
         url+= weburl[1]
 
-    dbg_print(self, f"web = {weburl}, url = {url}")
+    _dbg_print(f"web = {weburl}, url = {url}")
 
     # Send the GET request with the Host header set to the original domain
     try:
@@ -165,7 +176,7 @@ def inet_get_ipaddr_info(weburl="ifconfig.me", ipv6=False):
         raise(e)
 
     if res.status_code != 200:
-        wrn_print(self, "return code =", res.status_code)
+        _wrn_print("return code =", res.status_code)
 
     # RAF: return code 206 is partial content and should be discarded
     if res.status_code == 206:
@@ -194,12 +205,6 @@ def ipv6_get_ipaddr_info(url="ifconfig.me"):
     return inet_get_ipaddr_info(url, 1)
 
 ################################################################################
-
-from sys import _getframe
-# for current func name, specify 0 or no argument.
-# for name of caller of current func, specify 1.
-# for name of caller of caller of current func, specify 2. etc.
-func_name = lambda n=0: _getframe(n+1).f_code.co_name
 
 # RAF, TODO
 #
@@ -436,7 +441,7 @@ def get_ipaddr_info(force=False):
     
     self.dbg = inet_get_ipaddr_info.dbg or get_ipaddr_info.dbg
 
-    dbg_print(self, f"{self.tries} -", self.text.replace("\n", " "), "-",
+    _dbg_print(f"{self.tries} -", self.text.replace("\n", " "), "-",
         str(int((monotonic()-self.start)*1000))+" ms" if self.start else "")
     if self.dbg: self.start = monotonic()
 
@@ -463,26 +468,26 @@ def get_ipaddr_info(force=False):
         self.ipv4 = ipv4
     except Exception as e:
         if 1 or self.dbg:
-            err_print(self, f"ipv4, {self.tries}, {url4} - ", str(e))
+            _err_print(f"ipv4, {self.tries}, {url4} - ", str(e))
         self.ipv4 = ""
     try:
         ipv6 = ipv6_get_ipaddr_info(url6)
         self.ipv6 = ipv6
     except Exception as e:
         if 1 or self.dbg:
-            err_print(self, f"ipv6, {self.tries}, {url6} - ", str(e))
+            _err_print(f"ipv6, {self.tries}, {url6} - ", str(e))
         self.ipv6 = ""
 
     if not ipv4 and not ipv6:
         if self.dbg:
-            wrn_print(self, "ipaddr quest failed, but still trying")
+            _wrn_print("ipaddr quest failed, but still trying")
         return inrun_reset(ipaddr_searching + ipaddr_errstring)
 
     self.city = get_country_city(ipv4 if ipv4 else ipv6)
     self.text = ipv4 + (" - " if ipv4 else "") + self.city \
             + "\n" + (ipv6 if ipv6 else "-= ipv6 address missing =-")
 
-    dbg_print(self, f"{self.tries} -", self.text.replace("\n", " "), "-" +
+    _dbg_print(f"{self.tries} -", self.text.replace("\n", " "), "-" +
         str(int((monotonic()-self.start) * 1000)) + "ms" if self.start else "")
 
     ipaddr_info_update(1)
@@ -531,7 +536,7 @@ def get_country_city(ipaddr):
     strn = details.city + " (" + details.country + ")"
     rst_dict_set(ipaddr, strn)
 
-    dbg_print(self, "dict =", self.dict)
+    _dbg_print("dict =", self.dict)
     return strn
 
 get_country_city.city = ""
@@ -728,13 +733,13 @@ def kill_all_instances(filename=filename):
     try:
         ret_str = getoutput(f"for i in $({cmdx}); do kill $i; kill -1 $i; done")
     except Exception as e:
-        err_print(self, "xterm - ", str(e), "\n\n")
+        _err_print("xterm - ", str(e), "\n\n")
     else:
         pass
     try:
         ret_str+= getoutput(f"for i in $({cmda}); do kill $i; kill -1 $i; done")
     except Exception as e:
-        err_print(self, "guiapp - ", str(e), "\n\n")
+        _err_print("guiapp - ", str(e), "\n\n")
     else:
         pass
     if not ret_str: ret_str = "(OK)"
@@ -861,7 +866,7 @@ def show_weather_xterm():
         root.tr.daemon_start(target=wait_weather_xterm, args=(pid,))
     else:
         self.pid = -1
-        wrn_print(self, "failed with error - ", retstrn)
+        _wrn_print("failed with error - ", retstrn)
 
 show_weather_xterm.pid = -1
 show_weather_xterm.cmdline = ""
