@@ -13,6 +13,7 @@ TODO
 + in main loop check for the access registration
 + when internet is down, gui app freezes
 + with no registration, there is no IP information
++ service_taskbar() should show a headless "wait..." window
 
 HALF
 

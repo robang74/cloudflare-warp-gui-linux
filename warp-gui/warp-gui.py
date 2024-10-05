@@ -604,6 +604,7 @@ def service_taskbar():
         cmdline = 'systemctl --user disable warp-taskbar;'
         cmdline+=' systemctl --user stop warp-taskbar'
     retstr = getoutput(cmdline)
+    sleep(1)
 
 
 def wait_status():
