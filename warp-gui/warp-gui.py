@@ -1108,6 +1108,9 @@ class UpdateThread(object):
         dltme = int((start - self.start) * 1000)
 
         status = get_status()
+        if get_status.err:
+            stats_label.config(text = get_status.err)
+
         try:
             top = root.attributes('-topmost')
             top|= (root.focus_get() != None)
