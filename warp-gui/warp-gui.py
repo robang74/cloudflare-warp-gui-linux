@@ -608,13 +608,11 @@ def service_taskbar():
 
 
 def wait_status():
-    stats_label.config(text = "")
-
-    while True:
-        status = get_status()
-        if is_status_stable(status):
-            return status
+    status = get_status()
+    stats_label.config(text = status.err)
+    while is_status_stable(status):
         sleep(T_POLLING())
+        status = get_status()
 
 
 def set_weather_button_state(state):
