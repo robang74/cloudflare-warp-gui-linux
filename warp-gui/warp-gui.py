@@ -236,8 +236,6 @@ is_status_stable = lambda x: (x == "UP" or x == "DN")
 
 is_network_down = lambda x: (x == "RGM" or x == "ERR")
 
-is_access_regist = lambda: False if get_status.last in ["", "RGM", "ERR"] else True
-
 def get_status(wait=0):
     inrun_wait_or_set(wait)
 
@@ -1099,6 +1097,7 @@ class UpdateThread(object):
         self.antm = 0
         self.skip = 0
         self.start = 0
+        self.neterr = 0
         self.status = ""
         self._event = Event()
         self.time_ms = time_ms
@@ -1136,27 +1135,39 @@ class UpdateThread(object):
         start = monotonic()
         dltme = int((start - self.start) * 1000)
 
-        status = get_status()
-        if get_status.err:
-            stats_label.config(text = get_status.err)
-
         try:
-            top = root.attributes('-topmost')
-            top|= (root.focus_get() != None)
+            update = root.attributes('-topmost')
+            update|= (root.focus_get() != None)
         except:
-            top = 1
+            update = 1
 
-        if top:
+        status = get_status()
+        neterr = is_network_down(status)
+        #print(f"status: {status}, neterr: {neterr}")
+        if self.neterr != neterr and status != "CN":
+            if self.dbg and self.neterr != "":
+                print(f"DBG> network error changed from {self.neterr} to {neterr}")
+            self.neterr = neterr
+            update = 2
+
+        if update:
+            update_guiview(status, 1)
             if status == "UP":
                 stats_label_update()
-            update_guiview(status, 0)
+            elif neterr:
+                ipaddr_text_set(ipaddr_errstring)
         else:
             stats_label.config(fg = "DimGray")
 
-        if self.status != status and is_status_stable(status):
-            status_icon_update(status, get_access.last)
+        if self.status != status and status != "CN":
+            if neterr or is_status_stable(status):
+                status_icon_update(status, get_access.last)
+                if self.dbg:
+                    print(f"DBG> status changed '{self.status}' to '{status}' with {neterr}\n")
+                root.bell()
+            if update > 1:
+                slide_update(status)
             self.status = status
-            root.bell()
 
         now = monotonic()
         self.antm = int((now - start) * 1000)
