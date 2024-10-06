@@ -234,6 +234,8 @@ def inrun_reset(val=None):
 
 is_status_stable = lambda x: (x == "UP" or x == "DN")
 
+is_network_down = lambda x: (x == "RGM" or x == "ERR")
+
 is_access_regist = lambda: False if get_status.last in ["", "RGM", "ERR"] else True
 
 def get_status(wait=0):
@@ -304,12 +306,14 @@ def common_reset_by_menu(refresh=False):
 
 
 def settings_reset():
+    enroll.team = 0
     common_reset_by_menu()
     err_str = getoutput("warp-cli settings reset")
     update_guiview_by_menu("settings reset", err_str)
 
 
 def registration_delete():
+    enroll.team = 0
     common_reset_by_menu()
     err_str = getoutput("warp-cli registration delete")
     update_guiview_by_menu("registration delete", err_str)
@@ -323,9 +327,14 @@ def information_refresh():
     update_guiview_by_menu("information refresh")
 
 
+def set_slogan_button_state(state):
+    slogan.config(state = state)
+    slogan.update_idletasks()
+
 def session_renew():
     global registration_new_cmdline
 
+    set_slogan_button_state(DISABLED)
     warp_mode_old = get_settings.warp_mode
     warp_dnsf_old = get_settings.warp_dnsf
     oldval = get_status.last
@@ -349,6 +358,7 @@ def session_renew():
     set_settings(warp_mode_old, warp_dnsf_old)
     update_guiview_by_menu("WARP session renew", err_str)
     access_icon_update()
+    set_slogan_button_state(NORMAL)
 
 ################################################################################
 
@@ -363,11 +373,14 @@ def get_access():
 get_access.last = ""
 get_access.inrun = 0
 
+
 def access_icon_update(status=get_status.last, zerotrust=get_access.last):
-    if not is_access_regist():
+    enroll.team = 1
+    if zerotrust:
+        slogan.config(image = tmlogo)
+    elif is_network_down(status) or not status:
         slogan.config(image = cflogo)
-    elif zerotrust:
-        slogan.config(image = cflogo)
+        enroll.team = 0
     else:
         slogan.config(image = tmlogo)
 
@@ -573,23 +586,26 @@ from tkinter import simpledialog
 
 def enroll():
     global registration_new_cmdline
+    slogan.config(state = DISABLED)
 
-    getoutput("warp-cli disconnect")
-    try:
-        if get_access.last or not is_access_regist():
-            cmdline = registration_new_cmdline
-            getoutput(cmdline)
-            slogan.config(image = cflogo)
-        else:
-            organization = simpledialog.askstring(title="Organization",
-                                      prompt="What's your Organization?:")
-            if organization != "":
-                new_command = "yes yes | warp-cli --accept-tos teams-enroll "
-                getoutput(new_command + organization)
-                slogan.config(image = tmlogo)
-    except:
-        pass
+    if not enroll.team:
+        output = getoutput(registration_new_cmdline)
+        if output.find("success"):
+            enroll.team = 1
+    else:
+        organization = simpledialog.askstring(title="Organization",
+                                  prompt="What's your Organization?:")
+        if organization:
+            print("enroll in TEAM network:", organization)
+            new_command = "warp-cli registration delete; "
+            new_command+= "yes yes | warp-cli --accept-tos teams-enroll "
+            output = getoutput(new_command + organization)
+            print("enroll in TEAM returns:", output)
+
     auto_update_guiview()
+    slogan.config(state = NORMAL)
+
+enroll.team = 0
 
 
 def set_dns_filter(filter):
