@@ -1047,6 +1047,8 @@ def slide_update(status):
     elif status == "DC":
         status_label.config(text = "Disconnecting...", fg = "DimGray",
             font = ("Arial", 15, 'italic') )
+    elif status == "ERR":
+        status_label.config(fg = "DimGray", font = ("Arial", 15, 'italic') )
 
     on_button.config(image = slide)
 
