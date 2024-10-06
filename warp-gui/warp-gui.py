@@ -624,14 +624,18 @@ def set_weather_button_state(state):
     menubar.entryconfigure(7, state=(NORMAL if state else DISABLED))
 
 
+def set_on_button_state(state):
+    on_button.config(state = state)
+    on_button.update_idletasks()
+
+
 def change_ipaddr_text(text=""):
     if not text:
         text = get_ipaddr_info()
     if text != ipaddr_label.cget("text"):
         ipaddr_text_set(text)
         set_weather_button_state("update")
-        on_button.config(state = NORMAL)
-
+        set_on_button_state(NORMAL)
 
 def auto_update_guiview(errlog=1):
     status = get_status()
@@ -697,7 +701,7 @@ def slide_switch():
 
     root.tr.pause()
     ipaddr_text_set()
-    on_button.config(state = DISABLED)
+    set_on_button_state(DISABLED)
 
     if get_status.last == "UP":
         get_status.last = "DC"
