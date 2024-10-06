@@ -9,11 +9,11 @@ TODO
 + why name change disrupt recreated helpmenu bahviour? (8a63ffc)
 + use @decoration for try_dict_get() & Co. variables
 + wttr.in weather forecast service in white
-+ when starts with registration missing, notify it
 + in main loop check for the access registration
-+ when internet is down, gui app freezes
 + with no registration, there is no IP information
-+ service_taskbar() should show a headless "wait..." window
++ service_taskbar() should show a headless "wait" window
++ warp-cli -l status is interesting but with a socket
++ team registration is alternative a warp registration
 
 HALF
 
@@ -43,4 +43,6 @@ v wttr.in cities with spaces requires + .replace()
 v investigate why the app is wasting 13% of CPU time
   -> answer: .after() used with 100 ms for polling
 v renew session should visualize the slide on/off/on, again
-
+v when starts with registration missing, notify it
+v when internet is down, gui app freezes
+v in task() a status error should update the slide button
