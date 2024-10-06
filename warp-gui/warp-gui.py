@@ -616,14 +616,6 @@ def service_taskbar():
     sleep(1)
 
 
-def wait_status():
-    status = get_status()
-    stats_label.config(text = status.err)
-    while is_status_stable(status):
-        sleep(T_POLLING())
-        status = get_status()
-
-
 def set_weather_button_state(state):
     if state == "update":
         state = (show_weather_xterm.pid < 0)
@@ -642,7 +634,13 @@ def change_ipaddr_text(text=""):
 
 
 def auto_update_guiview(errlog=1):
-    update_guiview(wait_status(), errlog, 1)
+    status = get_status()
+    stats_label.config(text = get_status.err)
+    while status == "CN" or status == "DC":
+        sleep(T_POLLING())
+        status = get_status()
+        #print("status:", status)
+    update_guiview(status, errlog, 1)
 
 
 def update_guiview(status, errlog=1, force=0):
