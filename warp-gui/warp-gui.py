@@ -60,7 +60,7 @@ shellbin = "/bin/bash"
 
 registration_new_cmdline = "warp-cli --accept-tos registration new"
 registration_new_cmdline +=" && warp-cli dns families malware"
-registration_new_cmdline +=" && warp-cli set-mode warp+doh"
+registration_new_cmdline +=" && warp-cli mode warp+doh"
 
 ipv6_system_check_cmdline = 'for i in all.disable_ipv6 default.disable_ipv6;'
 ipv6_system_check_cmdline +=' do sysctl net.ipv6.conf.$i; done | grep "= *0"'
