@@ -14,6 +14,15 @@ TODO
 + service_taskbar() should show a headless "wait" window
 + warp-cli -l status is interesting but with a socket
 + team registration is alternative a warp registration
++ integrate a button for a scientific calculator (extra)
+
+NOTE
+
+export URL=https://www.desmos.com/scientific;
+export GDK_BACKEND=x11 WPOSZ="0,100,100,520,480";
+surf -z1.5 -Snigmf $URL & sleep 1 && wmctrl -set WM_NAME \
+    "Scientific Calculator" -r :ACTIVE: -e $WPOSZ
+
 
 HALF
 
