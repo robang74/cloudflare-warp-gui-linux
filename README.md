@@ -95,6 +95,11 @@ Icon on the taskbar changes with the connection status and the VPN type:
 
 There are two sets of icons: the second one is for Debian integration in "*main*" repository.
 
+![Weather Service](warp-gui-wttr-in.png)
+
+Included into the Python app, there is a weather service which leverages the IP address geolocalisation.
+When the client is connected through CloudFlare, the geolocalisation refers to the existing location.
+
 ----
 
 ## License terms
