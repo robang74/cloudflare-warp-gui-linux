@@ -303,6 +303,13 @@ def common_reset_by_menu(refresh=False):
     ipaddr_text_set()
 
 
+def service_restart():
+    enroll.team = 0
+    common_reset_by_menu()
+    err_str = getoutput("pkexec systemctl restart warp-svc")
+    update_guiview_by_menu("service restart", err_str)
+
+
 def settings_reset():
     enroll.team = 0
     common_reset_by_menu()
@@ -960,6 +967,7 @@ def create_cascade_menu(menubar=menubar):
     cm.add_command(label=" \u204E WARP Session Renew ", command=session_renew)
     cm.add_command(label=" \u204E WARP Session Delete", command=registration_delete)
     cm.add_command(label=" \u204E WARP Settings Reset", command=settings_reset)
+    cm.add_command(label=" \u204E WARP Service Restart", command=service_restart)
     cm.add_separator()
     cm.add_command(label="\u2058 DNS Filter: family",   command=partial(set_dns_filter, "full"))
     cm.add_command(label="\u2058 DNS Filter: malware",  command=partial(set_dns_filter, "malware"))
