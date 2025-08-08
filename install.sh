@@ -61,7 +61,7 @@ if [ -n "$missing_packages" ]; then
 fi
 
 # Check for required python modules
-if [ -f "requirements.txt" ]; then
+if [ -n "$requirements" ]; then
     echo "Installing Python modules from requirements.txt..."
     pip3 install -r requirements.txt
 else
