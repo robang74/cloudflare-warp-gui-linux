@@ -1,6 +1,56 @@
 #!/usr/bin/python3
-from os import getpid, path, kill, environ
+################################################################################
+#
+# Cloudflare WARP GUI for linux
+#
+# (C) 2022, Pham Ngoc Son <phamngocsonls@gmail.com> - Public Domain
+# (C) 2024, Roberto A. Foglietta <roberto.foglietta@gmail.com> - 3-clause BSD
+# (C) 2024, Pham Ngoc Son <phamngocsonls@gmail.com> - 3-clause BSD
+# (C) 2024, Roberto A. Foglietta <roberto.foglietta@gmail.com> - GPLv2
+# (C) 2025, Roberto A. Foglietta <roberto.foglietta@gmail.com> - GPLv2
+#
+################################################################################
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# https://www.gnu.org/licenses/old-licenses/gpl-2.0.en.html
+#
+# NO WARRANTY ##################################################################
+# 
+# 11. BECAUSE THE PROGRAM IS LICENSED FREE OF CHARGE, THERE IS NO WARRANTY FOR
+# THE PROGRAM, TO THE EXTENT PERMITTED BY APPLICABLE LAW. EXCEPT WHEN OTHERWISE
+# STATED IN WRITING THE COPYRIGHT HOLDERS AND/OR OTHER PARTIES PROVIDE THE
+# PROGRAM "AS IS" WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED OR IMPLIED,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
+# FITNESS FOR A PARTICULAR PURPOSE. THE ENTIRE RISK AS TO THE QUALITY AND
+# PERFORMANCE OF THE PROGRAM IS WITH YOU. SHOULD THE PROGRAM PROVE DEFECTIVE,
+# YOU ASSUME THE COST OF ALL NECESSARY SERVICING, REPAIR OR CORRECTION.
+#
+# 12. IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR AGREED TO IN WRITING WILL
+# ANY COPYRIGHT HOLDer, OR ANY OTHER PARTY WHO MAY MODIFY AND/OR REDISTRIBUTE
+# THE PROGRAM AS PERMITTED ABOVE, BE LIABLE TO YOU FOR DAMAGES, INCLUDING ANY
+# GENERAL, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES ARISING OUT OF THE USE
+# OR INABILITY TO USE THE PROGRAM (INCLUDING BUT NOT LIMITED TO LOSS OF DATA OR
+# DATA BEING RENDERED INACCURATE OR LOSSES SUSTAINED BY YOU OR THIRD PARTIES OR
+# A FAILURE OF THE PROGRAM TO OPERATE WITH ANY OTHER PROGRAMS), EVEN IF SUCH
+# HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+#
+################################################################################
+# To check the WARP connection: curl https://www.cloudflare.com/cdn-cgi/trace/
+
+import signal
+import atexit
 import subprocess
+
+from os import getpid, path, kill, environ
 from requests import get as getUrl, urllib3
 from threading import Thread, Event
 from time import sleep
@@ -10,8 +60,6 @@ from ipinfo import getHandler
 from time import process_time_ns, monotonic
 from tkinter import simpledialog
 from functools import partial
-import signal
-import atexit
 
 filename = path.basename(__file__)
 dir_path = path.dirname(path.realpath(__file__))
