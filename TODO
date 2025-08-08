@@ -51,6 +51,7 @@ v kill down wttr.in xterm when ipaddr refresh or app exits
 v wttr.in cities with spaces requires + .replace()
 v investigate why the app is wasting 13% of CPU time
   -> answer: .after() used with 100 ms for polling
+v trying asyncio sleep() instead of time sleep()
 v renew session should visualize the slide on/off/on, again
 v when starts with registration missing, notify it
 v when internet is down, gui app freezes
