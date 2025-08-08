@@ -102,18 +102,22 @@ def _chk_print(sn, *p):
         print(f"{sn}> {fn}:", *p)
 
 ''' OLDER IMPLEMENTATION EQUIVALENT, FOR DEBUG
-'''
+
 from subprocess import getoutput
 def cmdoutput(cmd):
     return getoutput(cmd)
-
+'''
 ''' NEWER IMPLEMENTATION EQUIVALENT, FOR DEFAULT
+'''
 from subprocess import run as cmdrun
 def cmdoutput(cmd):
     proc = cmdrun(cmd, shell=True, capture_output=True, text=True,
         env={"PATH": path_bin}, encoding='utf-8')
-    return proc.stdout + "\n" + proc.stderr
-'''
+    combined_output = proc.stdout + proc.stderr
+    lines = combined_output.splitlines()
+    non_blank_lines = [line for line in lines if line.strip()]
+    clean_output = '\n'.join(non_blank_lines)
+    return clean_output
 
 ################################################################################
 
@@ -923,12 +927,16 @@ on = PhotoImage(file = on_dir)
 off_dir = dir_path + "/free/slide-off.png"
 off = PhotoImage(file = off_dir)
 
+
+
 try:
     logo_dir = dir_path + "/orig/team-logo.png"
     tmlogo = PhotoImage(file = logo_dir)
 except:
     logo_dir = dir_path + "/free/team-letter.png"
     tmlogo = PhotoImage(file = logo_dir)
+tmicon = Label(root, text = "tmlogo", image=tmlogo)
+tmicon.image = tmlogo # This creates a persistent reference
 
 try:
     cflogo_dir = dir_path + "/orig/warp-logo.png"
@@ -936,6 +944,8 @@ try:
 except:
     cflogo_dir = dir_path + "/free/warp-letter.png"
     cflogo = PhotoImage(file = cflogo_dir)
+cficon = Label(root, text = "cflogo", image=cflogo)
+cficon.image = cflogo # This creates a persistent reference
 
 try:
     appicon_path = dir_path + "/orig/appicon-init.png"
