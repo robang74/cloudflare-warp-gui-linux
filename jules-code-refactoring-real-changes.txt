@@ -1,0 +1,68 @@
+--- a/warp-gui/warp-gui.py
++++ b/warp-gui/warp-gui.py
++# (C) 2025, Roberto A. Foglietta <roberto.foglietta@gmail.com> - GPLv2
++
+-from time import sleep
+-from subprocess import getoutput
++from time import process_time_ns, monotonic, sleep
++from socket import getaddrinfo, AF_INET, AF_INET6
++from random import randrange, seed
++from ipinfo import getHandler
++from functools import partial
++from sys import _getframe
++
++################################################################################
++path_bin = "/bin:/usr/bin:/usr/local/bin"
+-from sys import _getframe
++''' OLDER IMPLEMENTATION EQUIVALENT, FOR DEBUG
++'''
++from subprocess import getoutput
++def cmdoutput(cmd):
++    return getoutput(cmd)
++
++# TODO: user enviroment is determing for D-BUS et all.
++''' NEWER IMPLEMENTATION EQUIVALENT, FOR DEFAULT
++from subprocess import run as cmdrun
++def cmdoutput(cmd):
++    proc = cmdrun(cmd, shell=True, capture_output=True, text=True,
++        env={"PATH": path_bin}, encoding='utf-8')
++    print(proc.stderr)
++    combined_output = proc.stdout + proc.stderr
++    lines = combined_output.splitlines()
++    non_blank_lines = [line for line in lines if line.strip()]
++    clean_output = '\n'.join(non_blank_lines)
++    return clean_output
++'''
++
+-from socket import getaddrinfo, AF_INET, AF_INET6
+-
+-    return getoutput("warp-cli --version")
++    return cmdoutput("warp-cli --version")
+-from random import randrange, seed
+-from ipinfo import getHandler
+-from time import process_time_ns, monotonic
+-
+-from tkinter import simpledialog
+-
+-    getoutput("warp-cli dns families " + filter)
+-    getoutput("warp-cli mode " + mode)
+-from functools import partial
+-
++
++
++tmicon = Label(root, text = "tmlogo", image=tmlogo)
++tmicon.image = tmlogo # This creates a persistent reference
++cficon = Label(root, text = "cflogo", image=cflogo)
++cficon.image = cflogo # This creates a persistent reference
+-
+-        self._event = Event()
+-    def freeze(self):
+-        pause(self)
+-        root._event.clear()
+-
+-    def unfreeze(self):
+-        root._event.set()
+-        resume(self)
+-
+-gui_version_str = "GUI v0.8.9"
++gui_version_str = "GUI v0.9.0"
