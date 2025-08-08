@@ -7,6 +7,7 @@
 # (C) 2024, Roberto A. Foglietta <roberto.foglietta@gmail.com> - 3-clause BSD
 # (C) 2024, Pham Ngoc Son <phamngocsonls@gmail.com> - 3-clause BSD
 # (C) 2024, Roberto A. Foglietta <roberto.foglietta@gmail.com> - GPLv2
+# (C) 2025, Roberto A. Foglietta <roberto.foglietta@gmail.com> - GPLv2
 #
 ################################################################################
 #
@@ -34,7 +35,7 @@
 # YOU ASSUME THE COST OF ALL NECESSARY SERVICING, REPAIR OR CORRECTION.
 #
 # 12. IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR AGREED TO IN WRITING WILL
-# ANY COPYRIGHT HOLDer, OR ANY OTHER PARTY WHO MAY MODIFY AND/OR REDISTRIBUTE
+# ANY COPYRIGHT HOLDER, OR ANY OTHER PARTY WHO MAY MODIFY AND/OR REDISTRIBUTE
 # THE PROGRAM AS PERMITTED ABOVE, BE LIABLE TO YOU FOR DAMAGES, INCLUDING ANY
 # GENERAL, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES ARISING OUT OF THE USE
 # OR INABILITY TO USE THE PROGRAM (INCLUDING BUT NOT LIMITED TO LOSS OF DATA OR
@@ -44,6 +45,8 @@
 #
 ################################################################################
 # To check the WARP connection: curl https://www.cloudflare.com/cdn-cgi/trace/
+
+import subprocess
 
 from tkinter import *
 from warp_gui.actions import *
@@ -224,8 +227,6 @@ def slide_update(status):
 
 slide_update.status_old = ""
 
-
-import subprocess
 def stats_label_update():
     if stats_label_update.inrun:
         return
