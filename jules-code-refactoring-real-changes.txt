@@ -1,3 +1,16 @@
+RATIONALE
+
+I worked as a professional software developer for many years but Python is not one
+of those languages that I can claim to master. I use Python in an opportunistic way.
+
+Under this PoV, I was curious to understand how much Jules could help to improvethis
+little project of mine. Which is also an opportunistic project, something that I would
+not do it as a hobby but not for a client or a market use. I was in need of that,
+alternatives were not meeting my needs, I developed a best-effort solution for myself.
+
+The best use-case test for Google Jules, working on a code that "just works for me" but
+Jules can bring to the next level, something that can go to the market as a product.
+
 *** Google Jule Code Refactoring Claims: ***************************************
 
 This commit introduces a number of improvements to the Cloudflare WARP GUI application.
