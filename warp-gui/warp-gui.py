@@ -46,6 +46,8 @@
 ################################################################################
 # To check the WARP connection: curl https://www.cloudflare.com/cdn-cgi/trace/
 
+import signal
+import atexit
 import subprocess
 
 from tkinter import *
