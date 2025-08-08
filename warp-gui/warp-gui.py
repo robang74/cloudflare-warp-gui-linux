@@ -102,17 +102,18 @@ def _chk_print(sn, *p):
         print(f"{sn}> {fn}:", *p)
 
 ''' OLDER IMPLEMENTATION EQUIVALENT, FOR DEBUG
+'''
 from subprocess import getoutput
 def cmdoutput(cmd):
     return getoutput(cmd)
-'''
+
 ''' NEWER IMPLEMENTATION EQUIVALENT, FOR DEFAULT
-'''
 from subprocess import run as cmdrun
 def cmdoutput(cmd):
     proc = cmdrun(cmd, shell=True, capture_output=True, text=True,
         env={"PATH": path_bin}, encoding='utf-8')
     return proc.stdout + "\n" + proc.stderr
+'''
 
 ################################################################################
 
@@ -1344,6 +1345,12 @@ def unexpose_handler(event):
         unexpose_handler.inrun = 0
         printdbg("foucus out done")
     printdbg("")
+
+unexpose_handler.inrun = 0
+unexpose_handler.dbg = 0
+
+helpmenu.bind_all("<FocusOut>", unexpose_handler)
+
 
 def get_methods(object):
     return [method_name for method_name in dir(object) \
