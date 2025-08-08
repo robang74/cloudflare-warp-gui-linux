@@ -12,108 +12,69 @@ echo
 echo "Checking system requisites and dependencies..."
 echo
 
-################################################################################
+# Function to check if a command exists
+command_exists() {
+    command -v "$1" >/dev/null 2>&1
+}
 
-if [ "$HOME" == "" ]; then
-    if [ "$USER" != "" -a -d "/home/$USER/" ]; then
-        export HOME="/home/$USER"
-        echo
-        echo "WARNING: enviroment variable \$HOME is not set"
-        echo "         currently set to $HOME"
-        echo
-        read -sp "Press a key to continue"
-        echo
-    fi
-fi
+# Check for required packages
+required_packages="pip3 python3 python3-tk warp-cli dpkg xterm curl sed procps"
+missing_packages=""
 
-err=0
-
-if [ "$HOME" == "" ]; then
-    echo
-    echo "ERROR: enviroment variable \$HOME is not set"
-    echo
-    err=1
-fi
-
-for i in pip3 python3 warp-cli dpkg; do
-    if ! which $i >/dev/null; then
-        echo
-        echo "WARNING: $i package is not installed"
-        echo
-        echo "HOW2FIX: sudo apt-get install $i -y"
-        echo
-        err=1
+for pkg in $required_packages; do
+    if ! command_exists "$pkg"; then
+        missing_packages="$missing_packages $pkg"
     fi
 done
 
-if ! which python3 | grep -q /usr/bin/python3; then
+if [ -n "$missing_packages" ]; then
+    echo "WARNING: The following required packages are not installed:"
+    echo "$missing_packages"
     echo
-    echo "WARNING: /usr/bin/python3 is not in execution path"
-    echo
-    err=1
+    echo "Please install them using the following command:"
+    echo "sudo apt-get install -y $missing_packages"
+    exit 1
 fi
 
-for i in python3-tk xterm curl sed procps; do
-    if ! dpkg -l $i | grep -e "^ii" >/dev/null; then
-        echo
-        echo "WARNING: $i package is not installed"
-        echo
-        echo "HOW2FIX: sudo apt-get install $i -y"
-        echo
-        err=1
-    fi
-done
-
-for i in ipinfo requests tkinter time os subprocess threading socket sys \
-    random functools signal atexit; do
-    if ! python3 -c "import $i" 2>/dev/null; then
-        echo
-        echo "WARNING: pip3 module which import '$i' is not installed"
-        echo
-        echo "HOW2FIX: pip3 install $i"
-        echo
-        err=1
-    fi
-done
-
-if [ $err -eq 0 ]; then ########################################################
+# Check for required python modules
+requirements="ipinfo requests"
+if [ -n "$requirements" ]; then
+    echo
+    echo "Installing required Python modules: $requirements ..."
+    pip3 install $requirements
+    echo
+fi
 
 echo "Creating folders and copying files..."
 echo
 
-mkdir -p $HOME/.local/share/applications/
-mkdir -p $HOME/.local/share/icons/
-mkdir -p $HOME/.local/bin/
+mkdir -p "$HOME/.local/share/applications/"
+mkdir -p "$HOME/.local/share/icons/"
+mkdir -p "$HOME/.local/bin/"
 
-sed -e "s,%HOME%,$HOME,g" warp-gui.desktop > $HOME/Desktop/warp-gui.desktop
+sed -e "s,%HOME%,$HOME,g" warp-gui.desktop > "$HOME/Desktop/warp-gui.desktop"
 
-if [ -r $HOME/.local/share/icons/warp-gui-app.png ]; then
+if [ -r "$HOME/.local/share/icons/warp-gui-app.png" ]; then
     # RAF: useful to trigger the image cache cleaning
-    rm -f $HOME/.local/share/icons/warp-gui-app.png
+    rm -f "$HOME/.local/share/icons/warp-gui-app.png"
 fi
 
 if [ -r appicon.png ]; then
-    cp -f appicon.png $HOME/.local/share/icons/warp-gui-app.png
+    cp -f appicon.png "$HOME/.local/share/icons/warp-gui-app.png"
 else
-    cp -f appclue.png $HOME/.local/share/icons/warp-gui-app.png
+    cp -f appclue.png "$HOME/.local/share/icons/warp-gui-app.png"
 fi
-cp -f $HOME/Desktop/warp-gui.desktop $HOME/.local/share/applications
+cp -f "$HOME/Desktop/warp-gui.desktop" "$HOME/.local/share/applications"
 
-if [ -d orig/ ]; then
-    cp -rf warp-gui/{orig,*.py} $HOME/.local/bin/
-else
-    cp -rf warp-gui/{free,*.py} $HOME/.local/bin/
+if [ -d warp-gui/orig/ ]; then
+    cp -rf warp-gui/orig/ "$HOME/.local/bin/"
 fi
-chmod a+x $HOME/.local/bin/warp-gui.py
+cp -f warp-gui/*.py "$HOME/.local/bin/"
+chmod a+x "$HOME/.local/bin/warp-gui.py"
 
 echo "Disabling WARP taskbar applet..."
 echo
-systemctl --user disable warp-taskbar
-systemctl --user stop warp-taskbar
+systemctl --user disable --now warp-taskbar >/dev/null 2>&1 || true
 
 echo "Installation done."
 echo
-
-fi #############################################################################
-
-
