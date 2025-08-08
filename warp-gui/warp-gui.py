@@ -7,7 +7,6 @@
 # (C) 2024, Roberto A. Foglietta <roberto.foglietta@gmail.com> - 3-clause BSD
 # (C) 2024, Pham Ngoc Son <phamngocsonls@gmail.com> - 3-clause BSD
 # (C) 2024, Roberto A. Foglietta <roberto.foglietta@gmail.com> - GPLv2
-# (C) 2025, Roberto A. Foglietta <roberto.foglietta@gmail.com> - GPLv2
 #
 ################################################################################
 #
@@ -48,23 +47,16 @@
 
 import signal
 import atexit
-
 from tkinter import *
+from time import sleep
 from os import getpid, path, kill, environ
+import subprocess
+from subprocess import getoutput
 from requests import get as getUrl, urllib3
-from time import process_time_ns, monotonic, sleep
-from socket import getaddrinfo, AF_INET, AF_INET6
 from threading import Thread, Event
-from random import randrange, seed
-from ipinfo import getHandler
-from functools import partial
-from sys import _getframe
-
-################################################################################
 
 filename = path.basename(__file__)
 dir_path = path.dirname(path.realpath(__file__))
-path_bin = "/bin:/usr/bin:/usr/local/bin"
 shellbin = "/bin/bash"
 
 registration_new_cmdline = "warp-cli --accept-tos registration new"
@@ -76,10 +68,10 @@ ipv6_system_check_cmdline +=' do sysctl net.ipv6.conf.$i; done | grep "= *0"'
 ipv6_system_check_cmdline +=' | wc -l'
 
 show_weather_xterm_title = "Weekly Weather Forecast"
-strn =  'xterm -bg black +wf -hold +ls -fa "Ubuntu Mono" -fs 12 -uc +ah +bc +aw'
+strn =  r'xterm -bg black +wf -hold +ls -fa "Ubuntu Mono" -fs 12 -uc +ah +bc +aw'
 strn +=f' -geometry "130x40+500+90" -title "{show_weather_xterm_title}"  +l +cm'
-strn += ' -e ${SHELL} -c "echo; echo \ Weather report: ${city} loading...; curl'
-strn += ' -qsNm 5 wttr.in/${city}?Fp 2>&1 | sed -e \'\$d\'; printf \033[?25l\a"'
+strn += r' -e ${SHELL} -c "echo; echo \ Weather report: ${city} loading...; curl'
+strn += r' -qsNm 5 wttr.in/${city}?Fp 2>&1 | sed -e \'\$d\'; printf \033[?25l\a"'
 show_weather_xterm_cmdline = strn + ' >/dev/null 2>&1 & echo $!'
 
 ipaddr_errstring = "\n-= error or timeout =-"
@@ -87,6 +79,7 @@ ipaddr_searching = "-=-.-=-.-=-.-=-"
 
 def T_POLLING(): return 0.10
 
+from sys import _getframe
 # for current func name, specify 0 or no argument.
 # for name of caller of current func, specify 1.
 # for name of caller of caller of current func, specify 2. etc.
@@ -101,25 +94,32 @@ def _chk_print(sn, *p):
     if sn != "DBG" or eval(fn+'.dbg'):
         print(f"{sn}> {fn}:", *p)
 
-''' OLDER IMPLEMENTATION EQUIVALENT, FOR DEBUG
-'''
-from subprocess import getoutput
 def cmdoutput(cmd):
-    return getoutput(cmd)
+  try:
+    return subprocess.check_output(cmd, shell=True, timeout=10, stderr=subprocess.STDOUT).decode("utf-8")
+  except subprocess.TimeoutExpired:
+    return "== ERROR: TIMEOUT =="
+  except subprocess.CalledProcessError as e:
+    return e.output.decode("utf-8")
 
-# TODO: user enviroment is determing for D-BUS et all.
-''' NEWER IMPLEMENTATION EQUIVALENT, FOR DEFAULT
-from subprocess import run as cmdrun
-def cmdoutput(cmd):
-    proc = cmdrun(cmd, shell=True, capture_output=True, text=True,
-        env={"PATH": path_bin}, encoding='utf-8')
-    print(proc.stderr)
-    combined_output = proc.stdout + proc.stderr
-    lines = combined_output.splitlines()
-    non_blank_lines = [line for line in lines if line.strip()]
-    clean_output = '\n'.join(non_blank_lines)
-    return clean_output
-'''
+def warp_api_call(command):
+    """
+    A wrapper for calling the warp-cli tool.
+    """
+    return cmdoutput(f"warp-cli {command}")
+
+def get_warp_status_api():
+    """
+    Example of how to use the warp_api_call function to get the status.
+    """
+    status_output = warp_api_call("status")
+    # Parse the output to get the status
+    if "Connected" in status_output:
+        return "Connected"
+    elif "Disconnected" in status_output:
+        return "Disconnected"
+    else:
+        return "Unknown"
 
 ################################################################################
 
@@ -161,6 +161,8 @@ def fnc_dict_rst(func):
     func.reset = func.delay
 
 ################################################################################
+
+from socket import getaddrinfo, AF_INET, AF_INET6
 
 def inet_get_ipaddr_info(weburl="ifconfig.me", ipv6=False):
     self = inet_get_ipaddr_info
@@ -265,7 +267,7 @@ is_network_down = lambda x: (x == "RGM" or x == "ERR")
 def get_status(wait=0):
     inrun_wait_or_set(wait)
 
-    status = cmdoutput("warp-cli status")
+    status = warp_api_call("status")
     _dbg_print("(b)", status.replace("\n", " "))
     if not status.find("Success"):
         return get_status(0.5)
@@ -339,14 +341,14 @@ def service_restart():
 def settings_reset():
     enroll.team = 0
     common_reset_by_menu()
-    err_str = cmdoutput("warp-cli settings reset")
+    err_str = warp_api_call("settings reset")
     update_guiview_by_menu("settings reset", err_str)
 
 
 def registration_delete():
     enroll.team = 0
     common_reset_by_menu()
-    err_str = cmdoutput("warp-cli registration delete")
+    err_str = warp_api_call("registration delete")
     update_guiview_by_menu("registration delete", err_str)
 
 
@@ -396,7 +398,7 @@ def session_renew():
 def get_access():
     inrun_wait_or_set()
 
-    account = cmdoutput("warp-cli registration show")
+    account = warp_api_call("registration show")
     get_access.last = (account.find("Team") > -1)
 
     return inrun_reset(get_access.last)
@@ -442,7 +444,7 @@ def status_icon_update(status=get_status.last, zerotrust=get_access.last):
 
 
 def cf_info():
-    return cmdoutput("warp-cli --version")
+    return warp_api_call("--version")
 
 
 def ipaddr_info_update(enable=0):
@@ -475,6 +477,10 @@ ipaddr_info_update.inrun = 0
 
 ################################################################################
 
+from random import randrange, seed
+from ipinfo import getHandler
+from time import process_time_ns, monotonic
+
 seed(process_time_ns())
 
 def get_ipaddr_info(force=False):
@@ -482,7 +488,7 @@ def get_ipaddr_info(force=False):
     self = get_ipaddr_info
 
     inrun_wait_or_set()
-
+    
     self.dbg = inet_get_ipaddr_info.dbg or get_ipaddr_info.dbg
 
     _dbg_print(f"{self.tries} -", self.text.replace("\n", " "), "-",
@@ -609,6 +615,8 @@ ipv6_system_check_thread.start()
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
+from tkinter import simpledialog
+
 def enroll():
     global registration_new_cmdline
     slogan.config(state = DISABLED)
@@ -634,12 +642,12 @@ enroll.team = 0
 
 
 def set_dns_filter(filter):
-    out = cmdoutput("warp-cli dns families " + filter)
+    warp_api_call("dns families " + filter)
     get_settings.warp_settings = ""
 
 
 def set_mode(mode):
-    out = cmdoutput("warp-cli mode " + mode)
+    warp_api_call("mode " + mode)
     get_settings.warp_settings = ""
     ipaddr_text_set()
 
@@ -748,12 +756,12 @@ def slide_switch():
         get_status.last = "DC"
         status_label.config(text = "Disconnecting...", fg = "Dimgray",
             font = ("Arial", 15, 'italic') )
-        retstr = cmdoutput("warp-cli disconnect")
+        retstr = warp_api_call("disconnect")
     elif get_status.last == "DN":
         get_status.last = "CN"
         status_label.config(text = "Connecting...", fg = "Dimgray",
             font = ("Arial", 15, 'italic') )
-        retstr = cmdoutput("warp-cli --accept-tos connect")
+        retstr = warp_api_call("--accept-tos connect")
 
     root.tr.resume()
     auto_update_guiview()
@@ -768,11 +776,11 @@ def kill_all_instances(filename=filename):
     if not filename:
         handle_exit()
 
-    ereg = '"s/\([0-9]*\) .*python.*[ /]' + filename + '$/\\\\1/p"'
+    ereg = r'"s/\([0-9]*\) .*python.*[ /]' + filename + r'$/\\1/p"'
     cmda = 'pgrep -u $USER -alf ' + filename + ' | sed -ne ' \
           + ereg + " | grep -v $PPID"
 
-    ereg = '"s/\([ 0-9]*\) .*title ' + show_weather_xterm_title + ' .*/\\\\1/p"'
+    ereg = r'"s/\([ 0-9]*\) .*title ' + show_weather_xterm_title + r' .*/\\1/p"'
     cmdx = 'pgrep -u $USER -alf xterm | sed -ne ' + ereg
 
     self = kill_all_instances
@@ -920,6 +928,8 @@ show_weather_xterm.cmdline = ""
 
 # create root windows ##########################################################
 
+from functools import partial
+
 bgcolor = "GainsBoro"
 root = Tk()
 
@@ -929,16 +939,12 @@ on = PhotoImage(file = on_dir)
 off_dir = dir_path + "/free/slide-off.png"
 off = PhotoImage(file = off_dir)
 
-
-
 try:
     logo_dir = dir_path + "/orig/team-logo.png"
     tmlogo = PhotoImage(file = logo_dir)
 except:
     logo_dir = dir_path + "/free/team-letter.png"
     tmlogo = PhotoImage(file = logo_dir)
-tmicon = Label(root, text = "tmlogo", image=tmlogo)
-tmicon.image = tmlogo # This creates a persistent reference
 
 try:
     cflogo_dir = dir_path + "/orig/warp-logo.png"
@@ -946,8 +952,6 @@ try:
 except:
     cflogo_dir = dir_path + "/free/warp-letter.png"
     cflogo = PhotoImage(file = cflogo_dir)
-cficon = Label(root, text = "cflogo", image=cflogo)
-cficon.image = cflogo # This creates a persistent reference
 
 try:
     appicon_path = dir_path + "/orig/appicon-init.png"
@@ -1100,12 +1104,13 @@ def slide_update(status):
 
 slide_update.status_old = ""
 
+
 def stats_label_update():
     if stats_label_update.inrun:
         return
     stats_label_update.inrun = 1
 
-    warp_stats = cmdoutput("warp-cli tunnel stats")
+    warp_stats = warp_api_call("tunnel stats")
     if warp_stats == "":
         pass
     elif warp_stats != stats_label_update.warp_stats_last:
@@ -1130,6 +1135,7 @@ class UpdateThread(object):
         self.start = 0
         self.neterr = 0
         self.status = ""
+        self._event = Event()
         self.time_ms = time_ms
         self.ltcy_ms = time_ms >> 4
         self.daemon_start(target=self.run)
@@ -1147,6 +1153,14 @@ class UpdateThread(object):
     def resume(self):
         root.update_idletasks()
         self.skip = 0
+
+    def freeze(self):
+        pause(self)
+        root._event.clear()
+
+    def unfreeze(self):
+        root._event.set()
+        resume(self)
 
     def task(self):
         while self.skip:
@@ -1219,7 +1233,7 @@ lbl_pid_num = Label(frame, text = gui_pid_str, fg = "DimGray", bg = bgcolor,
     font = ("Arial", 10), pady=10, padx=10, justify=LEFT)
 lbl_pid_num.place(relx=0.0, rely=1.0, anchor='sw')
 
-gui_version_str = "GUI v0.9.0"
+gui_version_str = "GUI v0.8.9"
 
 lbl_gui_ver = Label(frame, text = gui_version_str, fg = "DimGray", bg = bgcolor,
     font = ("Arial", 11, 'bold'), pady=0, padx=10, justify=LEFT)
@@ -1245,7 +1259,7 @@ dnsf_label = [           'family', 'security', 'cloudflare-dns' ]
 def get_settings():
     global dnsf_types, dnsf_label, warp_label, warp_modes
 
-    retstr = cmdoutput(get_settings.warp_cmdline)
+    retstr = warp_api_call(get_settings.warp_cmdline)
     if get_settings.warp_settings == retstr:
         return
 
@@ -1254,7 +1268,7 @@ def get_settings():
     warp_mode_str = retstr[mode:].split()[0]
     warp_dnsf_str = retstr[dnsf:].split()[0].split(".")[0]
     get_settings.warp_settings = retstr
-
+    
     try:
         get_settings.warp_mode = warp_label.index(warp_mode_str) + 1
     except:
