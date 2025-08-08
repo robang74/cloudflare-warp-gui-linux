@@ -48,8 +48,8 @@
 
 import signal
 import atexit
-import subprocess
 
+from subprocess import run as cmdrun
 from os import getpid, path, kill, environ
 from requests import get as getUrl, urllib3
 from threading import Thread, Event
@@ -100,6 +100,9 @@ def _chk_print(sn, *p):
     fn=func_name(2)
     if sn != "DBG" or eval(fn+'.dbg'):
         print(f"{sn}> {fn}:", *p)
+
+def cmdoutput(cmd)
+    return cmdrun(cmd, shell=True, capture_output=True, text=True).stdout
 
 ################################################################################
 
@@ -245,7 +248,7 @@ is_network_down = lambda x: (x == "RGM" or x == "ERR")
 def get_status(wait=0):
     inrun_wait_or_set(wait)
 
-    status = subprocess.run("warp-cli status", shell=True, capture_output=True, text=True).stdout
+    status = cmdoutput("warp-cli status")
     _dbg_print("(b)", status.replace("\n", " "))
     if not status.find("Success"):
         return get_status(0.5)
@@ -312,21 +315,22 @@ def common_reset_by_menu(refresh=False):
 def service_restart():
     enroll.team = 0
     common_reset_by_menu()
-    err_str = subprocess.run("pkexec systemctl restart warp-svc", shell=True, capture_output=True, text=True).stderr
+    err_str = cmdrun("pkexec systemctl restart warp-svc",
+        shell=True, capture_output=True, text=True).stderr
     update_guiview_by_menu("service restart", err_str)
 
 
 def settings_reset():
     enroll.team = 0
     common_reset_by_menu()
-    err_str = subprocess.run("warp-cli settings reset", shell=True, capture_output=True, text=True).stdout
+    err_str = cmdoutput("warp-cli settings reset")
     update_guiview_by_menu("settings reset", err_str)
 
 
 def registration_delete():
     enroll.team = 0
     common_reset_by_menu()
-    err_str = subprocess.run("warp-cli registration delete", shell=True, capture_output=True, text=True).stdout
+    err_str = cmdoutput("warp-cli registration delete")
     update_guiview_by_menu("registration delete", err_str)
 
 
@@ -360,7 +364,7 @@ def session_renew():
     if oldval == "UP":
         cmdline += " && warp-cli connect"
 
-    err_str = subprocess.run("warp-cli registration delete; " + cmdline, shell=True, capture_output=True, text=True).stdout
+    err_str = cmdoutput("warp-cli registration delete; " + cmdline)
     if oldval == "UP":
         get_status.last = "CN"
     else:
@@ -376,7 +380,7 @@ def session_renew():
 def get_access():
     inrun_wait_or_set()
 
-    account = subprocess.run("warp-cli registration show", shell=True, capture_output=True, text=True).stdout
+    account = cmdoutput("warp-cli registration show")
     get_access.last = (account.find("Team") > -1)
 
     return inrun_reset(get_access.last)
@@ -422,7 +426,7 @@ def status_icon_update(status=get_status.last, zerotrust=get_access.last):
 
 
 def cf_info():
-    return subprocess.run("warp-cli --version", shell=True, capture_output=True, text=True).stdout
+    return cmdrun("warp-cli --version")
 
 
 def ipaddr_info_update(enable=0):
@@ -578,7 +582,7 @@ get_country_city.dbg = get_ipaddr_info.dbg
 
 
 def ipv6_system_check():
-    retstr = subprocess.run(ipv6_system_check_cmdline, shell=True, capture_output=True, text=True).stdout
+    retstr = cmdoutput(ipv6_system_check_cmdline)
     ipv6_system_check.enabled = (retstr == '2')
 
 ipv6_system_check.enabled = -1
@@ -594,7 +598,7 @@ def enroll():
     slogan.config(state = DISABLED)
 
     if not enroll.team:
-        output = subprocess.run(registration_new_cmdline, shell=True, capture_output=True, text=True).stdout
+        output = cmdoutput(registration_new_cmdline)
         if output.find("success"):
             enroll.team = 1
     else:
@@ -604,7 +608,7 @@ def enroll():
             print("enroll in TEAM network:", organization)
             new_command = "warp-cli registration delete; "
             new_command+= "yes yes | warp-cli --accept-tos teams-enroll "
-            output = subprocess.run(new_command + organization, shell=True, capture_output=True, text=True).stdout
+            output = cmdoutput(new_command + organization)
             print("enroll in TEAM returns:", output)
 
     auto_update_guiview()
@@ -614,26 +618,26 @@ enroll.team = 0
 
 
 def set_dns_filter(filter):
-    subprocess.run("warp-cli dns families " + filter, shell=True, capture_output=True, text=True)
+    cmdrun("warp-cli dns families " + filter, shell=True, capture_output=True, text=True)
     get_settings.warp_settings = ""
 
 
 def set_mode(mode):
-    subprocess.run("warp-cli mode " + mode, shell=True, capture_output=True, text=True)
+    cmdrun("warp-cli mode " + mode, shell=True, capture_output=True, text=True)
     get_settings.warp_settings = ""
     ipaddr_text_set()
 
 
 def service_taskbar():
     cmdline = 'systemctl --user status warp-taskbar | sed -ne "s/Active: //p"'
-    retstr = subprocess.run(cmdline, shell=True, capture_output=True, text=True).stdout
+    retstr = cmdoutput(cmdline)
     if retstr.find("inactive") > -1:
         cmdline = 'systemctl --user enable warp-taskbar;'
         cmdline+=' systemctl --user start warp-taskbar'
     else:
         cmdline = 'systemctl --user disable warp-taskbar;'
         cmdline+=' systemctl --user stop warp-taskbar'
-    retstr = subprocess.run(cmdline, shell=True, capture_output=True, text=True).stdout
+    retstr = cmdoutput(cmdline)
     sleep(1)
 
 
@@ -728,12 +732,12 @@ def slide_switch():
         get_status.last = "DC"
         status_label.config(text = "Disconnecting...", fg = "Dimgray",
             font = ("Arial", 15, 'italic') )
-        retstr = subprocess.run("warp-cli disconnect", shell=True, capture_output=True, text=True).stdout
+        retstr = cmdoutput("warp-cli disconnect")
     elif get_status.last == "DN":
         get_status.last = "CN"
         status_label.config(text = "Connecting...", fg = "Dimgray",
             font = ("Arial", 15, 'italic') )
-        retstr = subprocess.run("warp-cli --accept-tos connect", shell=True, capture_output=True, text=True).stdout
+        retstr = cmdoutput("warp-cli --accept-tos connect")
 
     root.tr.resume()
     auto_update_guiview()
@@ -758,13 +762,13 @@ def kill_all_instances(filename=filename):
     self = kill_all_instances
     ret_str = ""
     try:
-        ret_str = subprocess.run(f"for i in $({cmdx}); do kill $i; kill -1 $i; done", shell=True, capture_output=True, text=True).stdout
+        ret_str = cmdoutput(f"for i in $({cmdx}); do kill $i; kill -1 $i; done")
     except Exception as e:
         _err_print("xterm - ", str(e), "\n\n")
     else:
         pass
     try:
-        ret_str+= subprocess.run(f"for i in $({cmda}); do kill $i; kill -1 $i; done", shell=True, capture_output=True, text=True).stdout
+        ret_str+= cmdoutput(f"for i in $({cmda}); do kill $i; kill -1 $i; done")
     except Exception as e:
         _err_print("guiapp - ", str(e), "\n\n")
     else:
@@ -885,7 +889,7 @@ def show_weather_xterm():
         cmdl = cmdl.replace("${city}", city)
         cmdl = cmdl.replace("${SHELL}", shellbin)
         self.cmdline = cmdl
-    retstrn = subprocess.run(self.cmdline, shell=True, capture_output=True, text=True).stdout
+    retstrn = cmdoutput(self.cmdline)
     pid = int(retstrn)
     if pid > 0:
         self.pid = pid
@@ -1079,7 +1083,7 @@ def stats_label_update():
         return
     stats_label_update.inrun = 1
 
-    warp_stats = subprocess.run("warp-cli tunnel stats", shell=True, capture_output=True, text=True).stdout
+    warp_stats = cmdoutput("warp-cli tunnel stats")
     if warp_stats == "":
         pass
     elif warp_stats != stats_label_update.warp_stats_last:
@@ -1219,7 +1223,7 @@ dnsf_label = [           'family', 'security', 'cloudflare-dns' ]
 def get_settings():
     global dnsf_types, dnsf_label, warp_label, warp_modes
 
-    retstr = subprocess.run(get_settings.warp_cmdline, shell=True, capture_output=True, text=True).stdout
+    retstr = cmdoutput(get_settings.warp_cmdline)
     if get_settings.warp_settings == retstr:
         return
 
@@ -1252,7 +1256,7 @@ get_settings.warp_cmdline = 'warp-cli settings | grep --color=never -e "^("'
 def settings_report():
     settings_report_cmdline = get_settings.warp_cmdline
     settings_report_cmdline +=' | sed -e "s/.*\\t//" -e "s/@/\\n\\t/"'
-    report_str = subprocess.run(settings_report_cmdline, shell=True, capture_output=True, text=True).stdout
+    report_str = cmdoutput(settings_report_cmdline)
     print("\n\t-= SETTINGS REPORT =-\n\n" + report_str + "\n")
 
 
