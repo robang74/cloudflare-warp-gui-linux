@@ -5,6 +5,7 @@
 #
 # (C) 2022, Pham Ngoc Son <phamngocsonls@gmail.com> - Public Domain
 # (C) 2024, Roberto A. Foglietta <roberto.foglietta@gmail.com> - 3-clause BSD
+# (C) 2025, Roberto A. Foglietta <roberto.foglietta@gmail.com> - 3-clause BSD
 #
 ################################################################################
 
