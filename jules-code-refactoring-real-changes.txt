@@ -1,3 +1,24 @@
+*** Google Jule Code Refactoring Claims: ***************************************
+
+This commit introduces a number of improvements to the Cloudflare WARP GUI application.
+The main changes are:
+
+- Refactoring: The main application file, `warp-gui/warp-gui.py`, has been refactored 
+  to separate the UI code from the application logic. The non-UI code has been moved 
+  to a new file, `warp-gui/actions.py`.
+- Security: The use of `eval()` has been removed from the code to reduce security risks.
+  The `getoutput` function has been replaced with `subprocess.run` for better security
+  and error handling.
+- Installation: The `install.sh` script has been improved to provide more robust
+  dependency checking and to use a `requirements.txt` file for Python modules.
+- Bug Fixes: A syntax error in the `UpdateThread` class that could have caused
+  the application to crash has been fixed.
+
+********************************************************************************
+
+gitshell> ff v0.8.9 warp-gui/warp-gui.py | grep -ve "= getoutput" -e "= cmdoutput" |\
+    grep --color=none -e "^[+-]" | tee jules-code-refactoring-real-changes.txt
+
 --- a/warp-gui/warp-gui.py
 +++ b/warp-gui/warp-gui.py
 +# (C) 2025, Roberto A. Foglietta <roberto.foglietta@gmail.com> - GPLv2
