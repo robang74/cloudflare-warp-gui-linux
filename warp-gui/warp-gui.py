@@ -48,8 +48,8 @@
 
 import signal
 import atexit
-from tkinter import *
 
+from tkinter import *
 from subprocess import run as cmdrun
 from os import getpid, path, kill, environ
 from requests import get as getUrl, urllib3
@@ -65,6 +65,7 @@ from sys import _getframe
 
 filename = path.basename(__file__)
 dir_path = path.dirname(path.realpath(__file__))
+pathbin="/bin;/usr/bin;/usr/local/bin"
 shellbin = "/bin/bash"
 
 registration_new_cmdline = "warp-cli --accept-tos registration new"
@@ -101,8 +102,10 @@ def _chk_print(sn, *p):
     if sn != "DBG" or eval(fn+'.dbg'):
         print(f"{sn}> {fn}:", *p)
 
+from subprocess import getoutput
 def cmdoutput(cmd):
-    return cmdrun(cmd, shell=True, capture_output=True, text=True).stdout
+    return getoutput(cmd)
+#    return cmdrun(cmd, shell=True, capture_output=True, text=True, env={"PATH": pathbin}, encoding='utf-8',  stdout=subprocess.PIPE).stdout
 
 ################################################################################
 
@@ -315,7 +318,7 @@ def common_reset_by_menu(refresh=False):
 def service_restart():
     enroll.team = 0
     common_reset_by_menu()
-    err_str = cmdrun("pkexec systemctl restart warp-svc",
+    err_str = cmdrun("pkexec systemctl restart warp-svc", env={"PATH": pathbin},
         shell=True, capture_output=True, text=True).stderr
     update_guiview_by_menu("service restart", err_str)
 
@@ -426,7 +429,7 @@ def status_icon_update(status=get_status.last, zerotrust=get_access.last):
 
 
 def cf_info():
-    return cmdrun("warp-cli --version")
+    return cmdoutput("warp-cli --version")
 
 
 def ipaddr_info_update(enable=0):
@@ -618,12 +621,12 @@ enroll.team = 0
 
 
 def set_dns_filter(filter):
-    cmdrun("warp-cli dns families " + filter, shell=True, capture_output=True, text=True)
+    out = cmdoutput("warp-cli dns families " + filter)
     get_settings.warp_settings = ""
 
 
 def set_mode(mode):
-    cmdrun("warp-cli mode " + mode, shell=True, capture_output=True, text=True)
+    out = cmdoutput("warp-cli mode " + mode)
     get_settings.warp_settings = ""
     ipaddr_text_set()
 
@@ -1197,7 +1200,7 @@ lbl_pid_num = Label(frame, text = gui_pid_str, fg = "DimGray", bg = bgcolor,
     font = ("Arial", 10), pady=10, padx=10, justify=LEFT)
 lbl_pid_num.place(relx=0.0, rely=1.0, anchor='sw')
 
-gui_version_str = "GUI v0.8.9"
+gui_version_str = "GUI v0.9.0rc1"
 
 lbl_gui_ver = Label(frame, text = gui_version_str, fg = "DimGray", bg = bgcolor,
     font = ("Arial", 11, 'bold'), pady=0, padx=10, justify=LEFT)
