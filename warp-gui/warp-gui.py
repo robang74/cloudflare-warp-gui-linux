@@ -105,7 +105,11 @@ def _chk_print(sn, *p):
 from subprocess import getoutput
 def cmdoutput(cmd):
     return getoutput(cmd)
-#    return cmdrun(cmd, shell=True, capture_output=True, text=True, env={"PATH": pathbin}, encoding='utf-8',  stdout=subprocess.PIPE).stdout
+
+def _cmdoutput(cmd):
+    proc = cmdrun(cmd, shell=True, capture_output=True, text=True, env={"PATH": pathbin}, encoding='utf-8')
+    print( proc.stdout )
+    return proc.stdout
 
 ################################################################################
 
@@ -318,8 +322,7 @@ def common_reset_by_menu(refresh=False):
 def service_restart():
     enroll.team = 0
     common_reset_by_menu()
-    err_str = cmdrun("pkexec systemctl restart warp-svc", env={"PATH": pathbin},
-        shell=True, capture_output=True, text=True).stderr
+    err_str = cmdoutput("pkexec systemctl restart warp-svc")
     update_guiview_by_menu("service restart", err_str)
 
 
