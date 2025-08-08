@@ -50,7 +50,6 @@ import signal
 import atexit
 
 from tkinter import *
-from subprocess import run as cmdrun
 from os import getpid, path, kill, environ
 from requests import get as getUrl, urllib3
 from time import process_time_ns, monotonic, sleep
@@ -65,7 +64,7 @@ from sys import _getframe
 
 filename = path.basename(__file__)
 dir_path = path.dirname(path.realpath(__file__))
-pathbin="/bin;/usr/bin;/usr/local/bin"
+path_bin = "/bin:/usr/bin:/usr/local/bin"
 shellbin = "/bin/bash"
 
 registration_new_cmdline = "warp-cli --accept-tos registration new"
@@ -102,14 +101,18 @@ def _chk_print(sn, *p):
     if sn != "DBG" or eval(fn+'.dbg'):
         print(f"{sn}> {fn}:", *p)
 
+''' OLDER IMPLEMENTATION EQUIVALENT, FOR DEBUG
 from subprocess import getoutput
 def cmdoutput(cmd):
     return getoutput(cmd)
-
-def _cmdoutput(cmd):
-    proc = cmdrun(cmd, shell=True, capture_output=True, text=True, env={"PATH": pathbin}, encoding='utf-8')
-    print( proc.stdout )
-    return proc.stdout
+'''
+''' NEWER IMPLEMENTATION EQUIVALENT, FOR DEFAULT
+'''
+from subprocess import run as cmdrun
+def cmdoutput(cmd):
+    proc = cmdrun(cmd, shell=True, capture_output=True, text=True,
+        env={"PATH": path_bin}, encoding='utf-8')
+    return proc.stdout + "\n" + proc.stderr
 
 ################################################################################
 
@@ -1203,7 +1206,7 @@ lbl_pid_num = Label(frame, text = gui_pid_str, fg = "DimGray", bg = bgcolor,
     font = ("Arial", 10), pady=10, padx=10, justify=LEFT)
 lbl_pid_num.place(relx=0.0, rely=1.0, anchor='sw')
 
-gui_version_str = "GUI v0.9.0rc1"
+gui_version_str = "GUI v0.9.0"
 
 lbl_gui_ver = Label(frame, text = gui_version_str, fg = "DimGray", bg = bgcolor,
     font = ("Arial", 11, 'bold'), pady=0, padx=10, justify=LEFT)
