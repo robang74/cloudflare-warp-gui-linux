@@ -50,25 +50,21 @@ for pkg in $required_commands $required_packages; do
 done
 
 if [ -n "$missing_packages" ]; then
-    echo
-    echo "ERROR: The following required packages are not installed:"
+    echo "WARNING: The following required packages are not installed:"
     echo "$missing_packages"
     echo
     echo "Please install them using the following command:"
     echo "sudo apt-get install -y $missing_packages"
-    echo
     exit 1
 fi
 
 # Check for required python modules
+requirements="ipinfo requests"
 if [ -n "$requirements" ]; then
-    echo "Installing Python modules from requirements.txt..."
-    pip3 install -r requirements.txt
-else
     echo
-    echo "ERROR: requirements.txt not found. Skipping Python module installation."
+    echo "Installing required Python modules: $requirements ..."
+    pip3 install $requirements
     echo
-    exit 1
 fi
 
 echo "Creating folders and copying files..."
@@ -93,10 +89,9 @@ fi
 cp -f "$HOME/Desktop/warp-gui.desktop" "$HOME/.local/share/applications"
 
 if [ -d warp-gui/orig/ ]; then
-    cp -rf warp-gui/{orig,*.py} "$HOME/.local/bin/"
-else
-    cp -rf warp-gui/{free,*.py} "$HOME/.local/bin/"
+    cp -rf warp-gui/orig/ "$HOME/.local/bin/"
 fi
+cp -f warp-gui/*.py "$HOME/.local/bin/"
 chmod a+x "$HOME/.local/bin/warp-gui.py"
 
 echo "Disabling WARP taskbar applet..."
