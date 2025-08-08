@@ -96,7 +96,8 @@ def _chk_print(sn, *p):
 
 def cmdoutput(cmd):
   try:
-    return subprocess.check_output(cmd, shell=True, timeout=10, stderr=subprocess.STDOUT).decode("utf-8")
+    return subprocess.check_output(cmd, shell=True, timeout=10,
+        stderr=subprocess.STDOUT).decode("utf-8")
   except subprocess.TimeoutExpired:
     return "== ERROR: TIMEOUT =="
   except subprocess.CalledProcessError as e:
