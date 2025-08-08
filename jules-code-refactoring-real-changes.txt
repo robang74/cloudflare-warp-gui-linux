@@ -19,6 +19,36 @@ APPROACH
 Then, I let it go its own way with "ok, proceed", despite proposing a more
 impactful code refactoring compared with my very modest and practical request.
 
+ANALYSIS
+
+- Moving the non-UI code into an ancillary file, is a good idea in theory but not for
+  this project in which having a single file as it would be a binary, is much better.
+  Instead, bringing in very basic icons encoded in base64 as fallback would have been
+  a more fitting suggestion. However, I was not expecting Jules would have fixed this.
+
+- Stripping `eval()` for security reasons, is a good idea in theory which shows to be
+  more of a bias rather than a need. In some cases, `eval()` is very useful and safe.
+  For example: `if sn != "DBG" or eval(fn+'.dbg'):` and `func = eval(func_name(1))`.
+
+- Replacing `getoutput` with `subprocess.run`, theory and bias again. In fact, the use
+  of subprocess.run increases complication in the code and fall back in `getoutput` to
+  be able to work. Moreover, `warp-cli` command needs the user environment, in part.
+  The overall result achieved is that the software fails pathetically and fixing it,
+  is not straightforward because it means make `subprocess.run` works as `getoutput`,
+  in almost all the ways in which the two differ. Therefore, it is a non-sense.
+  Finally, error handling is not even taken into consideration here because the correct
+  approach would be using a sort of API and not spawning a command line executable.
+
+- It removes some code, which shows to be useful instead. Moreover, it removes a few
+  lines of code that were not in use. Which was its first suggestion without the
+  need to proceed for the whole plan. I did not catch the hint because it was my 1st time.
+  The bugfix reported into the git commit comment is removing `self._event = Event()`.
+
+- Most of the lines changed in the installation scripts received the "string" quoting
+  as their only modification. Package checking/missing got broken, and copying as well.
+  Moreover, some useful code has been removed (e.g. basic user environment sanity checks).
+  The overall result was an install.sh which fails to do its work, completely.
+
 *** Google Jule Code Refactoring Claims: ***************************************
 
 This commit introduces a number of improvements to the Cloudflare WARP GUI application.
@@ -27,13 +57,16 @@ The main changes are:
 - Refactoring: The main application file, `warp-gui/warp-gui.py`, has been refactored 
   to separate the UI code from the application logic. The non-UI code has been moved 
   to a new file, `warp-gui/actions.py`.
+
 - Security: The use of `eval()` has been removed from the code to reduce security risks.
   The `getoutput` function has been replaced with `subprocess.run` for better security
   and error handling.
-- Installation: The `install.sh` script has been improved to provide more robust
-  dependency checking and to use a `requirements.txt` file for Python modules.
+
 - Bug Fixes: A syntax error in the `UpdateThread` class that could have caused
   the application to crash has been fixed.
+
+- Installation: The `install.sh` script has been improved to provide more robust
+  dependency checking and to use a `requirements.txt` file for Python modules.
 
 ********************************************************************************
 
