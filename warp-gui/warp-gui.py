@@ -77,10 +77,10 @@ ipv6_system_check_cmdline +=' do sysctl net.ipv6.conf.$i; done | grep "= *0"'
 ipv6_system_check_cmdline +=' | wc -l'
 
 show_weather_xterm_title = "Weekly Weather Forecast"
-strn =  r'xterm -bg black +wf -hold +ls -fa "Ubuntu Mono" -fs 12 -uc +ah +bc +aw'
+strn =  'xterm -bg black +wf -hold +ls -fa "Ubuntu Mono" -fs 12 -uc +ah +bc +aw'
 strn +=f' -geometry "130x40+500+90" -title "{show_weather_xterm_title}"  +l +cm'
-strn += r' -e ${SHELL} -c "echo; echo \ Weather report: ${city} loading...; curl'
-strn += r' -qsNm 5 wttr.in/${city}?Fp 2>&1 | sed -e \'\$d\'; printf \033[?25l\a"'
+strn += ' -e ${SHELL} -c "echo; echo \ Weather report: ${city} loading...; curl'
+strn += ' -qsNm 5 wttr.in/${city}?Fp 2>&1 | sed -e \'\$d\'; printf \033[?25l\a"'
 show_weather_xterm_cmdline = strn + ' >/dev/null 2>&1 & echo $!'
 
 ipaddr_errstring = "\n-= error or timeout =-"
