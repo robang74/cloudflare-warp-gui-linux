@@ -11,6 +11,14 @@ alternatives were not meeting my needs, I developed a best-effort solution for m
 The best use-case test for Google Jules, working on a code that "just works for me" but
 Jules can bring to the next level, something that can go to the market as a product.
 
+APPROACH
+
+> Check the code for potential issues and improvements. Not a code redesign
+> just small changes that can provide relevant advantages or fixing bugs.
+
+Then, I let it go its own way with "ok, proceed", despite proposing a more
+impactful code refactoring compared with my very modest and practical request.
+
 *** Google Jule Code Refactoring Claims: ***************************************
 
 This commit introduces a number of improvements to the Cloudflare WARP GUI application.
