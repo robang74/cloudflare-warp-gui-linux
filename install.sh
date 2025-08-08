@@ -14,14 +14,35 @@ echo
 
 # Function to check if a command exists
 command_exists() {
-    command -v "$1" >/dev/null 2>&1
+    { command -v "$1" || dpkg -l $i | grep -e "^ii"; } >/dev/null 2>&1
 }
 
+################################################################################
+
+if [ "$HOME" == "" ]; then
+    if [ "$USER" != "" -a -d "/home/$USER/" ]; then
+        export HOME="/home/$USER"
+         echo
+         echo "WARNING: enviroment variable \$HOME is not set"
+         echo "         currently set to $HOME"
+         echo
+         read -sp "Press a key to continue"
+         echo
+     fi
+fi
+if [ "$HOME" == "" ]; then
+    echo
+    echo "ERROR: enviroment variable \$HOME is not set"
+    echo
+    exit 1
+fi
+
 # Check for required packages
-required_packages="pip3 python3 python3-tk warp-cli dpkg xterm curl sed procps"
+required_packages="python3-tk procps"
+required_commands="pip3 python3 warp-cli dpkg xterm curl sed"
 missing_packages=""
 
-for pkg in $required_packages; do
+for pkg in $required_commands $required_packages; do
     if ! command_exists "$pkg"; then
         missing_packages="$missing_packages $pkg"
     fi
