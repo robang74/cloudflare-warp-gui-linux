@@ -48,14 +48,14 @@
 
 import signal
 import atexit
+from tkinter import *
 
 from subprocess import run as cmdrun
 from os import getpid, path, kill, environ
 from requests import get as getUrl, urllib3
-from threading import Thread, Event
-from tkinter import DISABLED, NORMAL, simpledialog
 from time import process_time_ns, monotonic, sleep
 from socket import getaddrinfo, AF_INET, AF_INET6
+from threading import Thread, Event
 from random import randrange, seed
 from ipinfo import getHandler
 from functools import partial
@@ -101,7 +101,7 @@ def _chk_print(sn, *p):
     if sn != "DBG" or eval(fn+'.dbg'):
         print(f"{sn}> {fn}:", *p)
 
-def cmdoutput(cmd)
+def cmdoutput(cmd):
     return cmdrun(cmd, shell=True, capture_output=True, text=True).stdout
 
 ################################################################################
