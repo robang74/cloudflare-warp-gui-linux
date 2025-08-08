@@ -7,6 +7,7 @@
 # (C) 2024, Roberto A. Foglietta <roberto.foglietta@gmail.com> - 3-clause BSD
 # (C) 2024, Pham Ngoc Son <phamngocsonls@gmail.com> - 3-clause BSD
 # (C) 2024, Roberto A. Foglietta <roberto.foglietta@gmail.com> - GPLv2
+# (C) 2025, Roberto A. Foglietta <roberto.foglietta@gmail.com> - GPLv2
 #
 ################################################################################
 #
@@ -47,6 +48,8 @@
 
 import signal
 import atexit
+import subprocess
+
 from tkinter import *
 from time import sleep
 from os import getpid, path, kill, environ
@@ -1076,13 +1079,12 @@ def slide_update(status):
 
 slide_update.status_old = ""
 
-
 def stats_label_update():
     if stats_label_update.inrun:
         return
     stats_label_update.inrun = 1
 
-    warp_stats = getoutput("warp-cli tunnel stats")
+    warp_stats = subprocess.run("warp-cli tunnel stats", shell=True, capture_output=True, text=True).stdout
     if warp_stats == "":
         pass
     elif warp_stats != stats_label_update.warp_stats_last:
