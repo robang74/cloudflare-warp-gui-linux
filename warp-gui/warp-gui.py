@@ -1136,7 +1136,6 @@ class UpdateThread(object):
         self.start = 0
         self.neterr = 0
         self.status = ""
-        self._event = Event()
         self.time_ms = time_ms
         self.ltcy_ms = time_ms >> 4
         self.daemon_start(target=self.run)
@@ -1154,14 +1153,6 @@ class UpdateThread(object):
     def resume(self):
         root.update_idletasks()
         self.skip = 0
-
-    def freeze(self):
-        pause(self)
-        root._event.clear()
-
-    def unfreeze(self):
-        root._event.set()
-        resume(self)
 
     def task(self):
         while self.skip:
@@ -1234,7 +1225,7 @@ lbl_pid_num = Label(frame, text = gui_pid_str, fg = "DimGray", bg = bgcolor,
     font = ("Arial", 10), pady=10, padx=10, justify=LEFT)
 lbl_pid_num.place(relx=0.0, rely=1.0, anchor='sw')
 
-gui_version_str = "GUI v0.8.9"
+gui_version_str = "GUI v0.9.1"
 
 lbl_gui_ver = Label(frame, text = gui_version_str, fg = "DimGray", bg = bgcolor,
     font = ("Arial", 11, 'bold'), pady=0, padx=10, justify=LEFT)
