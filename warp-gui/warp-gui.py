@@ -48,10 +48,10 @@
 
 import signal
 import atexit
+import subprocess
 
 from tkinter import *
 from os import getpid, path, kill, environ
-import subprocess
 from requests import get as getUrl, urllib3
 from time import process_time_ns, monotonic, sleep
 from socket import getaddrinfo, AF_INET, AF_INET6
