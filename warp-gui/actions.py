@@ -35,7 +35,7 @@
 # YOU ASSUME THE COST OF ALL NECESSARY SERVICING, REPAIR OR CORRECTION.
 #
 # 12. IN NO EVENT UNLESS REQUIRED BY APPLICABLE LAW OR AGREED TO IN WRITING WILL
-# ANY COPYRIGHT HOLDer, OR ANY OTHER PARTY WHO MAY MODIFY AND/OR REDISTRIBUTE
+# ANY COPYRIGHT HOLDER, OR ANY OTHER PARTY WHO MAY MODIFY AND/OR REDISTRIBUTE
 # THE PROGRAM AS PERMITTED ABOVE, BE LIABLE TO YOU FOR DAMAGES, INCLUDING ANY
 # GENERAL, SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES ARISING OUT OF THE USE
 # OR INABILITY TO USE THE PROGRAM (INCLUDING BUT NOT LIMITED TO LOSS OF DATA OR
@@ -91,13 +91,13 @@ from sys import _getframe
 # for name of caller of caller of current func, specify 2. etc.
 func_name = lambda n=0: _getframe(n+1).f_code.co_name
 
-_dbg_print = lambda f, *p: _chk_print(f, "DBG", *p)
-_wrn_print = lambda f, *p: _chk_print(f, "WRN", *p)
-_err_print = lambda f, *p: _chk_print(f, "ERR", *p)
+_dbg_print = lambda *p: _chk_print("DBG", *p)
+_wrn_print = lambda *p: _chk_print("WRN", *p)
+_err_print = lambda *p: _chk_print("ERR", *p)
 
-def _chk_print(f, sn, *p):
-    fn=f.__name__
-    if sn != "DBG" or f.dbg:
+def _chk_print(sn, *p):
+    fn=func_name(2)
+    if sn != "DBG" or eval(fn+'.dbg'):
         print(f"{sn}> {fn}:", *p)
 
 ################################################################################
@@ -116,7 +116,8 @@ the_function_name.reset = the_function_name.delay
 
 '''
 
-def try_dict_get(func, key):
+def try_dict_get(key):
+    func = eval(func_name(1))
     if func.delay:
         try:
             value = func.dict[key]
@@ -126,7 +127,8 @@ def try_dict_get(func, key):
     return None
 
 
-def rst_dict_set(func, key, val):
+def rst_dict_set(key, val):
+    func = eval(func_name(1))
     if func.reset > 0:
         root.after(func.delay << 10, partial(fnc_dict_rst, func))
         func.reset = 0
@@ -149,7 +151,7 @@ def inet_get_ipaddr_info(weburl="ifconfig.me", ipv6=False):
     url = ""
 
     keydct = ("ipv6:" if ipv6 else "ipv4:") + dmname
-    restrn = try_dict_get(inet_get_ipaddr_info, keydct)
+    restrn = try_dict_get(keydct)
     if restrn != None:
         return restrn
 
@@ -172,7 +174,7 @@ def inet_get_ipaddr_info(weburl="ifconfig.me", ipv6=False):
     if len(weburl) > 1:
         url+= weburl[1]
 
-    _dbg_print(inet_get_ipaddr_info, f"web = {weburl}, url = {url}")
+    _dbg_print(f"web = {weburl}, url = {url}")
 
     # Send the GET request with the Host header set to the original domain
     try:
@@ -181,14 +183,14 @@ def inet_get_ipaddr_info(weburl="ifconfig.me", ipv6=False):
         raise(e)
 
     if res.status_code != 200:
-        _wrn_print(inet_get_ipaddr_info, "return code =", res.status_code)
+        _wrn_print("return code =", res.status_code)
 
     # RAF: return code 206 is partial content and should be discarded
     if res.status_code == 206:
         return ""
 
     restrn = res.text.split('\n',1)[0]
-    rst_dict_set(inet_get_ipaddr_info, keydct, restrn)
+    rst_dict_set(keydct, restrn)
     return restrn
 
 inet_get_ipaddr_info.dict = dict()
@@ -220,7 +222,8 @@ def ipv6_get_ipaddr_info(url="ifconfig.me"):
 #
 ##  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #  #
 
-def inrun_wait_or_set(func, wait=0):
+def inrun_wait_or_set(wait=0):
+    func = eval(func_name(1))
     if wait > 0:
         sleep(wait)
     else:
@@ -229,7 +232,8 @@ def inrun_wait_or_set(func, wait=0):
     func.inrun = 1
 
 
-def inrun_reset(func, val=None):
+def inrun_reset(val=None):
+    func = eval(func_name(1))
     func.inrun = 0
     return val
 
@@ -240,10 +244,10 @@ is_status_stable = lambda x: (x == "UP" or x == "DN")
 is_network_down = lambda x: (x == "RGM" or x == "ERR")
 
 def get_status(wait=0):
-    inrun_wait_or_set(get_status, wait)
+    inrun_wait_or_set(wait)
 
     status = subprocess.run("warp-cli status", shell=True, capture_output=True, text=True).stdout
-    _dbg_print(get_status, "(b)", status.replace("\n", " "))
+    _dbg_print("(b)", status.replace("\n", " "))
     if not status.find("Success"):
         return get_status(0.5)
 
@@ -266,8 +270,8 @@ def get_status(wait=0):
         get_ipaddr_info.text = ""
         get_status.last = status
 
-    _dbg_print(get_status, "(e)", status, status_err)
-    return inrun_reset(get_status, status)
+    _dbg_print("(e)", status, status_err)
+    return inrun_reset(status)
 
 get_status.err = ""
 get_status.last = ""
@@ -371,12 +375,12 @@ def session_renew():
 ################################################################################
 
 def get_access():
-    inrun_wait_or_set(get_access)
+    inrun_wait_or_set()
 
     account = subprocess.run("warp-cli registration show", shell=True, capture_output=True, text=True).stdout
     get_access.last = (account.find("Team") > -1)
 
-    return inrun_reset(get_access, get_access.last)
+    return inrun_reset(get_access.last)
 
 get_access.last = ""
 get_access.inrun = 0
@@ -441,9 +445,9 @@ def ipaddr_info_update(enable=0):
         except:
             pass
         menubar.entryconfigure(3, state = NORMAL)
-        inrun_reset(ipaddr_info_update)
+        inrun_reset()
     else:
-        inrun_wait_or_set(ipaddr_info_update)
+        inrun_wait_or_set()
         menubar.entryconfigure(3, state = DISABLED)
         root.tr.daemon_start(target=force_get_ipaddr_info)
 
@@ -458,11 +462,11 @@ def get_ipaddr_info(force=False):
     global ipaddr_searching, ipaddr_errstring
     self = get_ipaddr_info
 
-    inrun_wait_or_set(get_ipaddr_info)
+    inrun_wait_or_set()
 
     self.dbg = inet_get_ipaddr_info.dbg or get_ipaddr_info.dbg
 
-    _dbg_print(get_ipaddr_info, f"{self.tries} -", self.text.replace("\n", " "), "-",
+    _dbg_print(f"{self.tries} -", self.text.replace("\n", " "), "-",
         str(int((monotonic()-self.start)*1000))+" ms" if self.start else "")
     if self.dbg: self.start = monotonic()
 
@@ -471,7 +475,7 @@ def get_ipaddr_info(force=False):
     elif self.city.find("(") < 0:
         pass
     elif self.ipv4 or self.ipv6:
-        return inrun_reset(get_ipaddr_info, self.text)
+        return inrun_reset(self.text)
 
     self.tries += 1
     url4 = self.wurl4[0]
@@ -489,31 +493,31 @@ def get_ipaddr_info(force=False):
         self.ipv4 = ipv4
     except Exception as e:
         if 1 or self.dbg:
-            _err_print(get_ipaddr_info, f"ipv4, {self.tries}, {url4} - ", str(e))
+            _err_print(f"ipv4, {self.tries}, {url4} - ", str(e))
         self.ipv4 = ""
     try:
         ipv6 = ipv6_get_ipaddr_info(url6)
         self.ipv6 = ipv6
     except Exception as e:
         if 1 or self.dbg:
-            _err_print(get_ipaddr_info, f"ipv6, {self.tries}, {url6} - ", str(e))
+            _err_print(f"ipv6, {self.tries}, {url6} - ", str(e))
         self.ipv6 = ""
 
     if not ipv4 and not ipv6:
         if self.dbg:
-            _wrn_print(get_ipaddr_info, "ipaddr quest failed, but still trying")
-        return inrun_reset(get_ipaddr_info, ipaddr_searching + ipaddr_errstring)
+            _wrn_print("ipaddr quest failed, but still trying")
+        return inrun_reset(ipaddr_searching + ipaddr_errstring)
 
     self.city = get_country_city(ipv4 if ipv4 else ipv6)
     self.text = ipv4 + (" - " if ipv4 else "") + self.city \
             + "\n" + (ipv6 if ipv6 else "-= ipv6 address missing =-")
 
-    _dbg_print(get_ipaddr_info, f"{self.tries} -", self.text.replace("\n", " "), "-" +
+    _dbg_print(f"{self.tries} -", self.text.replace("\n", " "), "-" +
         str(int((monotonic()-self.start) * 1000)) + "ms" if self.start else "")
 
     ipaddr_info_update(1)
 
-    return inrun_reset(get_ipaddr_info, self.text)
+    return inrun_reset(self.text)
 
 get_ipaddr_info.hadler_token = ""
 get_ipaddr_info.handler = getHandler(get_ipaddr_info.hadler_token)
@@ -537,7 +541,7 @@ def get_country_city(ipaddr):
     if ipaddr == "":
         return ""
 
-    strn = try_dict_get(get_country_city, ipaddr)
+    strn = try_dict_get(ipaddr)
     if strn != None:
         if not self.city:
             self.city = self.last
@@ -555,9 +559,9 @@ def get_country_city(ipaddr):
     self.last = self.city
 
     strn = details.city + " (" + details.country + ")"
-    rst_dict_set(get_country_city, ipaddr, strn)
+    rst_dict_set(ipaddr, strn)
 
-    _dbg_print(get_country_city, "dict =", self.dict)
+    _dbg_print("dict =", self.dict)
     return strn
 
 get_country_city.city = ""
@@ -757,13 +761,13 @@ def kill_all_instances(filename=filename):
     try:
         ret_str = subprocess.run(f"for i in $({cmdx}); do kill $i; kill -1 $i; done", shell=True, capture_output=True, text=True).stdout
     except Exception as e:
-        _err_print(kill_all_instances, "xterm - ", str(e), "\n\n")
+        _err_print("xterm - ", str(e), "\n\n")
     else:
         pass
     try:
         ret_str+= subprocess.run(f"for i in $({cmda}); do kill $i; kill -1 $i; done", shell=True, capture_output=True, text=True).stdout
     except Exception as e:
-        _err_print(kill_all_instances, "guiapp - ", str(e), "\n\n")
+        _err_print("guiapp - ", str(e), "\n\n")
     else:
         pass
     if not ret_str: ret_str = "(OK)"
@@ -890,7 +894,7 @@ def show_weather_xterm():
         root.tr.daemon_start(target=wait_weather_xterm, args=(pid,))
     else:
         self.pid = -1
-        _wrn_print(show_weather_xterm, "failed with error - ", retstrn)
+        _wrn_print("failed with error - ", retstrn)
 
 show_weather_xterm.pid = -1
 show_weather_xterm.cmdline = ""
