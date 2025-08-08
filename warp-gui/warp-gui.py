@@ -53,13 +53,15 @@ import subprocess
 from os import getpid, path, kill, environ
 from requests import get as getUrl, urllib3
 from threading import Thread, Event
-from time import sleep
-from tkinter import DISABLED, NORMAL
+from tkinter import DISABLED, NORMAL, simpledialog
+from time import process_time_ns, monotonic, sleep
+from socket import getaddrinfo, AF_INET, AF_INET6
 from random import randrange, seed
 from ipinfo import getHandler
-from time import process_time_ns, monotonic
-from tkinter import simpledialog
 from functools import partial
+from sys import _getframe
+
+################################################################################
 
 filename = path.basename(__file__)
 dir_path = path.dirname(path.realpath(__file__))
@@ -85,7 +87,6 @@ ipaddr_searching = "-=-.-=-.-=-.-=-"
 
 def T_POLLING(): return 0.10
 
-from sys import _getframe
 # for current func name, specify 0 or no argument.
 # for name of caller of current func, specify 1.
 # for name of caller of caller of current func, specify 2. etc.
@@ -140,8 +141,6 @@ def fnc_dict_rst(func):
     func.reset = func.delay
 
 ################################################################################
-
-from socket import getaddrinfo, AF_INET, AF_INET6
 
 def inet_get_ipaddr_info(weburl="ifconfig.me", ipv6=False):
     self = inet_get_ipaddr_info
@@ -456,10 +455,6 @@ ipaddr_info_update.inrun = 0
 
 ################################################################################
 
-from random import randrange, seed
-from ipinfo import getHandler
-from time import process_time_ns, monotonic
-
 seed(process_time_ns())
 
 def get_ipaddr_info(force=False):
@@ -593,8 +588,6 @@ ipv6_system_check_thread = Thread(target=ipv6_system_check)
 ipv6_system_check_thread.start()
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-
-from tkinter import simpledialog
 
 def enroll():
     global registration_new_cmdline
@@ -906,8 +899,6 @@ show_weather_xterm.pid = -1
 show_weather_xterm.cmdline = ""
 
 # create root windows ##########################################################
-
-from functools import partial
 
 bgcolor = "GainsBoro"
 root = Tk()
