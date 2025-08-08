@@ -1286,11 +1286,21 @@ def handle_exit(*args):
 # put 0 instead of getpid() and the x-session will be killed, as well
 # this it happens only when the desktop link is used to start the app
 
+atexit.register(handle_exit)
+signal.signal(signal.SIGTERM, handle_exit)
+
 def ctrlc_handler(sig, frame):
     print(f' -> {filename} received SIGINT and exiting...\n')
     handle_exit()
 
+# this should be setup before calling main loop
+signal.signal(signal.SIGINT, ctrlc_handler)
+
+# it seems useless w or w/ signal but keep for further investigation
+# root.bind_all("<Control-C>", ctrlc_handler)
+
 ################################################################################
+
 def unexpose_handler(event):
     global helpmenu
 
