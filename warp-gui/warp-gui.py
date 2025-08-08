@@ -7,6 +7,7 @@
 # (C) 2024, Roberto A. Foglietta <roberto.foglietta@gmail.com> - 3-clause BSD
 # (C) 2024, Pham Ngoc Son <phamngocsonls@gmail.com> - 3-clause BSD
 # (C) 2024, Roberto A. Foglietta <roberto.foglietta@gmail.com> - GPLv2
+# (C) 2025, Roberto A. Foglietta <roberto.foglietta@gmail.com> - GPLv2
 #
 ################################################################################
 #
@@ -47,16 +48,24 @@
 
 import signal
 import atexit
+
 from tkinter import *
-from time import sleep
 from os import getpid, path, kill, environ
 import subprocess
-from subprocess import getoutput
 from requests import get as getUrl, urllib3
+from time import process_time_ns, monotonic, sleep
+from socket import getaddrinfo, AF_INET, AF_INET6
 from threading import Thread, Event
+from random import randrange, seed
+from ipinfo import getHandler
+from functools import partial
+from sys import _getframe
+
+################################################################################
 
 filename = path.basename(__file__)
 dir_path = path.dirname(path.realpath(__file__))
+path_bin = "/bin:/usr/bin:/usr/local/bin"
 shellbin = "/bin/bash"
 
 registration_new_cmdline = "warp-cli --accept-tos registration new"
@@ -79,7 +88,6 @@ ipaddr_searching = "-=-.-=-.-=-.-=-"
 
 def T_POLLING(): return 0.10
 
-from sys import _getframe
 # for current func name, specify 0 or no argument.
 # for name of caller of current func, specify 1.
 # for name of caller of caller of current func, specify 2. etc.
@@ -93,6 +101,26 @@ def _chk_print(sn, *p):
     fn=func_name(2)
     if sn != "DBG" or eval(fn+'.dbg'):
         print(f"{sn}> {fn}:", *p)
+
+''' OLDER IMPLEMENTATION EQUIVALENT, FOR DEBUG
+from subprocess import getoutput
+def cmdoutput(cmd):
+    return getoutput(cmd)
+'''
+
+# NOTE: user enviroment is determing for D-BUS et all.
+''' NEWER IMPLEMENTATION EQUIVALENT, FOR DEBUG
+from subprocess import run as cmdrun
+def cmdoutput(cmd):
+    proc = cmdrun(cmd, shell=True, capture_output=True, text=True,
+        env={"PATH": path_bin}, encoding='utf-8')
+    print(proc.stderr)
+    combined_output = proc.stdout + proc.stderr
+    lines = combined_output.splitlines()
+    non_blank_lines = [line for line in lines if line.strip()]
+    clean_output = '\n'.join(non_blank_lines)
+    return clean_output
+'''
 
 def cmdoutput(cmd):
   try:
@@ -162,8 +190,6 @@ def fnc_dict_rst(func):
     func.reset = func.delay
 
 ################################################################################
-
-from socket import getaddrinfo, AF_INET, AF_INET6
 
 def inet_get_ipaddr_info(weburl="ifconfig.me", ipv6=False):
     self = inet_get_ipaddr_info
@@ -478,10 +504,6 @@ ipaddr_info_update.inrun = 0
 
 ################################################################################
 
-from random import randrange, seed
-from ipinfo import getHandler
-from time import process_time_ns, monotonic
-
 seed(process_time_ns())
 
 def get_ipaddr_info(force=False):
@@ -489,7 +511,7 @@ def get_ipaddr_info(force=False):
     self = get_ipaddr_info
 
     inrun_wait_or_set()
-    
+
     self.dbg = inet_get_ipaddr_info.dbg or get_ipaddr_info.dbg
 
     _dbg_print(f"{self.tries} -", self.text.replace("\n", " "), "-",
@@ -615,8 +637,6 @@ ipv6_system_check_thread = Thread(target=ipv6_system_check)
 ipv6_system_check_thread.start()
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-
-from tkinter import simpledialog
 
 def enroll():
     global registration_new_cmdline
@@ -929,8 +949,6 @@ show_weather_xterm.cmdline = ""
 
 # create root windows ##########################################################
 
-from functools import partial
-
 bgcolor = "GainsBoro"
 root = Tk()
 
@@ -946,6 +964,8 @@ try:
 except:
     logo_dir = dir_path + "/free/team-letter.png"
     tmlogo = PhotoImage(file = logo_dir)
+tmicon = Label(root, text = "tmlogo", image=tmlogo)
+tmicon.image = tmlogo # This creates a persistent reference
 
 try:
     cflogo_dir = dir_path + "/orig/warp-logo.png"
@@ -953,6 +973,8 @@ try:
 except:
     cflogo_dir = dir_path + "/free/warp-letter.png"
     cflogo = PhotoImage(file = cflogo_dir)
+cficon = Label(root, text = "cflogo", image=cflogo)
+cficon.image = cflogo # This creates a persistent reference
 
 try:
     appicon_path = dir_path + "/orig/appicon-init.png"
