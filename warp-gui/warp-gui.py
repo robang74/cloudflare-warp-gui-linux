@@ -124,8 +124,12 @@ def cmdoutput(cmd):
 
 def cmdoutput(cmd):
   try:
-    return subprocess.check_output(cmd, shell=True, timeout=10,
+    combined_output = subprocess.check_output(cmd, shell=True, timeout=10,
         stderr=subprocess.STDOUT).decode("utf-8")
+    lines = combined_output.splitlines()
+    non_blank_lines = [line for line in lines if line.strip()]
+    clean_output = '\n'.join(non_blank_lines)
+    return clean_output
   except subprocess.TimeoutExpired:
     return "== ERROR: TIMEOUT =="
   except subprocess.CalledProcessError as e:
