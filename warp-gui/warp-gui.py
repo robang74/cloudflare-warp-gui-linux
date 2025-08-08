@@ -102,22 +102,24 @@ def _chk_print(sn, *p):
         print(f"{sn}> {fn}:", *p)
 
 ''' OLDER IMPLEMENTATION EQUIVALENT, FOR DEBUG
-
+'''
 from subprocess import getoutput
 def cmdoutput(cmd):
     return getoutput(cmd)
-'''
+
+# TODO: user enviroment is determing for D-BUS et all.
 ''' NEWER IMPLEMENTATION EQUIVALENT, FOR DEFAULT
-'''
 from subprocess import run as cmdrun
 def cmdoutput(cmd):
     proc = cmdrun(cmd, shell=True, capture_output=True, text=True,
         env={"PATH": path_bin}, encoding='utf-8')
+    print(proc.stderr)
     combined_output = proc.stdout + proc.stderr
     lines = combined_output.splitlines()
     non_blank_lines = [line for line in lines if line.strip()]
     clean_output = '\n'.join(non_blank_lines)
     return clean_output
+'''
 
 ################################################################################
 
