@@ -65,6 +65,17 @@ CONCLUSIONS
 
 - Overall, a waste of time. I will try again because no tool gives its best the 1st time.
 
+UPDATE
+
+- The 2nd try went much better because the prompt was much longer, explaining details,
+  constraints, requisites and with a narrow focus on a specific task instead of being
+  vague in goals and completely free-hands in execution. You may call it micro-management,
+  or a well-defined task in a SCRUM log, and the second is more fitting.
+
+- The task was accomplished and the code provided seems working. One regression has been
+  introduced but easy to catch and revert. Despite starting from an older code base the
+  integration was much easier and two more things have been learned about Python.
+
 ********************************************************************************
 *** Google Jules Code Refactoring Claims: **************************************
 
