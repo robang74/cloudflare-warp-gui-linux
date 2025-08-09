@@ -88,9 +88,11 @@ else
 fi
 cp -f "$HOME/Desktop/warp-gui.desktop" "$HOME/.local/share/applications"
 
-if [ -d warp-gui/orig/ ]; then
-    cp -rf warp-gui/orig/ "$HOME/.local/bin/"
-fi
+for i  in orig free small; do
+    if [ -d "warp-gui/$i/" ]; then
+        cp -rf "warp-gui/$i/" "$HOME/.local/bin/"
+    fi
+done
 cp -f warp-gui/*.py "$HOME/.local/bin/"
 chmod a+x "$HOME/.local/bin/warp-gui.py"
 
