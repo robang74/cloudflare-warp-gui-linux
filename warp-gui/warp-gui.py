@@ -1010,7 +1010,7 @@ except:
 
 # root window background color, title, dimension and position
 root.title("WARP GUI")
-root.geometry("360x480+120+90")
+root.geometry("360x580+120+90")
 root.resizable(False,False)
 root.iconphoto(True,appicon_init)
 root.config(bg = bgcolor)
@@ -1143,7 +1143,11 @@ def stats_label_update():
     elif warp_stats != stats_label_update.warp_stats_last:
         stats_label_update.warp_stats_last = warp_stats
         wsl = warp_stats.replace(';',' ')
+        wsl = wsl.replace('TLS Handshake:','— — — —')
+        wsl = wsl.replace('Version:', 'Encryption:')
+        wsl = wsl.replace('TLSv', 'TLS v')
         wsl = wsl.splitlines()
+        wsl = [line.strip() for line in wsl]
         wsl = wsl[0] + "\n" + "\n".join(map(str, wsl[2:]))
         stats_label.config(text = wsl, fg = "MidNightBlue")
 
@@ -1251,7 +1255,7 @@ lbl_pid_num = Label(frame, text = gui_pid_str, fg = "DimGray", bg = bgcolor,
     font = ("Arial", 10), pady=10, padx=10, justify=LEFT)
 lbl_pid_num.place(relx=0.0, rely=1.0, anchor='sw')
 
-gui_version_str = "GUI v0.9.1"
+gui_version_str = "GUI v0.9.2"
 
 lbl_gui_ver = Label(frame, text = gui_version_str, fg = "DimGray", bg = bgcolor,
     font = ("Arial", 11, 'bold'), pady=0, padx=10, justify=LEFT)
