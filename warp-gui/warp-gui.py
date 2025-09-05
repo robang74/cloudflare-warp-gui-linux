@@ -123,6 +123,7 @@ def cmdoutput(cmd):
 '''
 
 def cmdoutput(cmd):
+  print("CMD> ", cmd)
   try:
     combined_output = subprocess.check_output(cmd, shell=True, timeout=10,
         stderr=subprocess.STDOUT).decode("utf-8")
@@ -413,7 +414,7 @@ def session_renew():
     if oldval == "UP":
         cmdline += " && warp-cli connect"
 
-    err_str = cmdoutput("warp-cli registration delete; " + cmdline)
+    err_str = warp_api_call("registration delete; " + cmdline)
     if oldval == "UP":
         get_status.last = "CN"
     else:
@@ -655,9 +656,9 @@ def enroll():
                                   prompt="What's your Organization?:")
         if organization:
             print("enroll in TEAM network:", organization)
-            new_command = "warp-cli registration delete; "
-            new_command+= "yes yes | warp-cli --accept-tos teams-enroll "
-            output = cmdoutput(new_command + organization)
+            new_command = "registration delete; "
+            new_command+= "yes 'yes' | warp-cli --accept-tos teams-enroll "
+            output = warp_api_call(new_command + organization)
             print("enroll in TEAM returns:", output)
 
     auto_update_guiview()
@@ -1255,7 +1256,7 @@ lbl_pid_num = Label(frame, text = gui_pid_str, fg = "DimGray", bg = bgcolor,
     font = ("Arial", 10), pady=10, padx=10, justify=LEFT)
 lbl_pid_num.place(relx=0.0, rely=1.0, anchor='sw')
 
-gui_version_str = "GUI v0.9.2"
+gui_version_str = "GUI v0.9.3"
 
 lbl_gui_ver = Label(frame, text = gui_version_str, fg = "DimGray", bg = bgcolor,
     font = ("Arial", 11, 'bold'), pady=0, padx=10, justify=LEFT)
@@ -1272,7 +1273,7 @@ lbl_setting.place(relx=1.0, rely=1.0, anchor='se')
 ################################################################################
 
 warp_modes = ['unknown', 'warp', 'doh',          'warp+doh',
-       'dot',        'warp+dot',           'proxy',     'tunnel_only']
+       'dot',        'warp+dot',           'proxy',     'tunnel_only' ]
 warp_label = [           'Warp', 'DnsOverHttps', 'WarpWithDnsOverHttps',
        'DnsOverTls', 'WarpWithDnsOverTls', 'WarpProxy', 'TunnelOnly' ]
 dnsf_types = ['unknown', 'full',   'malware',  'off']
@@ -1308,13 +1309,13 @@ def get_settings():
 get_settings.warp_mode = 0
 get_settings.warp_dnsf = 0
 get_settings.warp_settings = ""
-get_settings.warp_cmdline = 'warp-cli settings | grep --color=never -e "^("'
+get_settings.warp_cmdline = 'settings | grep --color=never -e "^("'
 
 
 def settings_report():
     settings_report_cmdline = get_settings.warp_cmdline
     settings_report_cmdline +=' | sed -e "s/.*\\t//" -e "s/@/\\n\\t/"'
-    report_str = cmdoutput(settings_report_cmdline)
+    report_str = warp_api_call(settings_report_cmdline)
     print("\n\t-= SETTINGS REPORT =-\n\n" + report_str + "\n")
 
 
