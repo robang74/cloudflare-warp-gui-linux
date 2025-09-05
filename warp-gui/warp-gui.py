@@ -96,6 +96,7 @@ func_name = lambda n=0: _getframe(n+1).f_code.co_name
 _dbg_print = lambda *p: _chk_print("DBG", *p)
 _wrn_print = lambda *p: _chk_print("WRN", *p)
 _err_print = lambda *p: _chk_print("ERR", *p)
+_cmd_print = lambda *p: _chk_print("CMD", *p)
 
 def _chk_print(sn, *p):
     fn=func_name(2)
@@ -123,7 +124,7 @@ def cmdoutput(cmd):
 '''
 
 def cmdoutput(cmd):
-  print("CMD> ", cmd)
+#  _cmd_print(cmd)
   try:
     combined_output = subprocess.check_output(cmd, shell=True, timeout=10,
         stderr=subprocess.STDOUT).decode("utf-8")
