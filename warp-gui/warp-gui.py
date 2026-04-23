@@ -124,7 +124,7 @@ def cmdoutput(cmd):
 '''
 
 def cmdoutput(cmd):
-#  _cmd_print(cmd)
+  _cmd_print(cmd)
   try:
     combined_output = subprocess.check_output(cmd, shell=True, timeout=10,
         stderr=subprocess.STDOUT).decode("utf-8")
@@ -1012,7 +1012,7 @@ except:
 
 # root window background color, title, dimension and position
 root.title("WARP GUI")
-root.geometry("360x580+120+90")
+root.geometry("360x600+120+90")
 root.resizable(False,False)
 root.iconphoto(True,appicon_init)
 root.config(bg = bgcolor)
@@ -1257,7 +1257,7 @@ lbl_pid_num = Label(frame, text = gui_pid_str, fg = "DimGray", bg = bgcolor,
     font = ("Arial", 10), pady=10, padx=10, justify=LEFT)
 lbl_pid_num.place(relx=0.0, rely=1.0, anchor='sw')
 
-gui_version_str = "GUI v0.9.3"
+gui_version_str = "WarpGUI v0.9.4"
 
 lbl_gui_ver = Label(frame, text = gui_version_str, fg = "DimGray", bg = bgcolor,
     font = ("Arial", 11, 'bold'), pady=0, padx=10, justify=LEFT)
