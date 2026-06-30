@@ -4,6 +4,10 @@ A python TK graphic interface to manage the CloudFlare WARP+ or Team
 Zero Trust virtual private network (VPN) connection which also offers 
 an advertising-free and safe browsing domain name system (DNS).
 
+Also, check the CloudFlare `warp-cli` installation guide:
+
+- [install-cloudflare-warp-ubuntu.md](https://gist.github.com/robang74/f52ac63e5d2c7addf660847bb7a69caf)
+
 ----
 
 ### Pre-requisites
